@@ -7,6 +7,9 @@
 
 ---<img width="256" height="256" alt="image" src="https://github.com/user-attachments/assets/6805474c-a20d-4ba4-b066-cf83536dbf31" />
 
+<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/91287643-8f19-4af6-a78e-23cfea894b68" />
+
+
 
 ## 🇦🇪 العربية
 
@@ -20,6 +23,9 @@ GT-CLPM-CLI هو مدير حزم سطر أوامر شامل لأنظمة جنو/
 - دعم أنظمة Debian/Ubuntu, Fedora, Arch, openSUSE, Solus، وغيرها
 - أدوات صيانة النظام والنسخ الاحتياطي
 - دعم فلاتباك وسناب (عند توفرهما)
+
+<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/5d375033-1172-4b26-96a4-6b538b7a279b" />
+
 
 ### طريقة الاستخدام
 يمكنك تشغيل البرنامج مباشرة من الطرفية:
@@ -55,6 +61,7 @@ GT-CLPM-CLI is a comprehensive command-line package manager for GNU/Linux system
 - Supports Debian/Ubuntu, Fedora, Arch, openSUSE, Solus, and more
 - System maintenance tools and backup
 - Flatpak and Snap support (if available)
+<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/754d5049-e673-42d3-9c97-3c574f337917" />
 
 ### Usage
 Run the program directly from your terminal:
