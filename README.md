@@ -5,7 +5,8 @@
 **المطور:** GNUTUX  
 **الرخصة:** GPLv2
 
----
+---<img width="256" height="256" alt="image" src="https://github.com/user-attachments/assets/6805474c-a20d-4ba4-b066-cf83536dbf31" />
+
 
 ## 🇦🇪 العربية
 
