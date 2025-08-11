@@ -1,0 +1,11 @@
+#!/bin/bash
+
+# اسم الملف التنفيذي (عدّل هنا فقط إذا تغير اسم التطبيق)
+BIN="gt-usdr-gui"
+
+# تحديد المسار الكامل للملف التنفيذي داخل AppDir
+APPDIR="$(dirname "$(readlink -f "$0")")"
+EXEC="$APPDIR/usr/bin/$BIN"
+
+# تشغيل التطبيق الرسومي
+exec "$EXEC"

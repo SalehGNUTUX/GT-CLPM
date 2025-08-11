@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=GT-CLPM (CLI)
+Name[ar]=مدير الحزم جنوتوكس (طرفية)
+Comment=GNUTUX Command Line Package Manager (Terminal Edition)
+Comment[ar]=مدير حزم جنوتوكس عبر الطرفية (نسخة سطر الأوامر)
+Exec=gt-clpm-cli
+Icon=gt-clpm-cli-icon
+Terminal=true
+Categories=System;Utility;
+Keywords=package;manager;cli;terminal;linux;gnutux;
+Keywords[ar]=مدير;حزم;طرفية;لينكس;جنوتوكس;
