@@ -1,84 +1,192 @@
-# GT-CLPM-CLI
+# GT-CLPM - GNUTUX Command Line Package Manager
 
-مدير الحزم جنوتوكس (نسخة الطرفية)  
+![GT-CLPM](https://img.shields.io/badge/GT--CLPM-Package_Manager-blue)
+![Version](https://img.shields.io/badge/Version-1.0-green)
+![License](https://img.shields.io/badge/License-GPLv2-orange)
+![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey)
+
+<img width="256" height="256" alt="GT-CLPM Logo" src="https://github.com/user-attachments/assets/6805474c-a20d-4ba4-b066-cf83536dbf31" />
+
+مدير حزم سطر الأوامر الشامل لأنظمة جنو/لينكس  
 **الإصدار:** 1.0  
 **المطور:** GNUTUX  
 **الرخصة:** GPLv2
 
----<img width="256" height="256" alt="image" src="https://github.com/user-attachments/assets/6805474c-a20d-4ba4-b066-cf83536dbf31" />
-
-<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/91287643-8f19-4af6-a78e-23cfea894b68" />
-
-
+---
 
 ## 🇦🇪 العربية
 
-### نبذة
-GT-CLPM-CLI هو مدير حزم سطر أوامر شامل لأنظمة جنو/لينكس، يُتيح لك تثبيت وإزالة وتحديث والبحث عن الحزم عبر أشهر مديري الحزم من خلال واجهة طرفية واحدة موحدة وسهلة الاستخدام.
+### 🚀 النظرة العامة
+GT-CLPM هو مدير حزم سطر أوامر شامل لأنظمة جنو/لينكس، يُتيح لك إدارة الحزم عبر أشهر مديري الحزم من خلال واجهة طرفية واحدة موحدة وسهلة الاستخدام.
 
-### المميزات
-- دعم لغات متعددة (العربية والإنجليزية)
-- تثبيت/إزالة/تحديث/ترقية الحزم
-- البحث عن الحزم وعرض المعلومات
-- دعم أنظمة Debian/Ubuntu, Fedora, Arch, openSUSE, Solus، وغيرها
-- أدوات صيانة النظام والنسخ الاحتياطي
-- دعم فلاتباك وسناب (عند توفرهما)
+### ✨ المميزات الرئيسية
+- 🌐 دعم لغات متعددة (العربية والإنجليزية)
+- 📦 دعم 12+ مدير حزم مختلف
+- 📱 دعم فلاتباك وسناب
+- ⚙️ أدوات صيانة النظام والنسخ الاحتياطي
+- 🎨 واجهة ملونة وسهلة الاستخدام
+- 🔧 إصلاح الحزم المعطلة تلقائياً
 
-<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/5d375033-1172-4b26-96a4-6b538b7a279b" />
+### 📋 مديرو الحزم المدعومون
+- **APT** (Debian, Ubuntu)
+- **DNF/YUM** (Fedora, RHEL)
+- **Pacman** (Arch, Manjaro)
+- **Zypper** (openSUSE)
+- **Eopkg** (Solus)
+- **XBPS** (Void Linux)
+- **Emerge** (Gentoo)
+- **PKG** (FreeBSD)
+- **APK** (Alpine)
+- **Nix** (NixOS)
 
+### 🛠️ التثبيت
 
-### طريقة الاستخدام
-يمكنك تشغيل البرنامج مباشرة من الطرفية:
+#### التثبيت السريع (مستودع جيتهاب):
 ```bash
-./gt-clpm-cli
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
 ```
-أو عبر AppImage:
+
+#### باستخدام wget:
 ```bash
-./GT-CLPM-CLI-x86_64.AppImage
+wget -q -O - https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
 ```
-ستظهر لك قائمة نصية تفاعلية، يمكنك التنقل عبر الخيارات باستخدام الأرقام أو الأسهم (حسب النسخة).
 
-### المتطلبات
-- وجود Bash
-- توفر مدير الحزم المناسب (apt, dnf, pacman ...)
-- صلاحيات مدير النظام (root) لبعض العمليات
+#### التثبيت اليدوي:
+```bash
+git clone https://github.com/SalehGNUTUX/GT-CLPM.git
+cd GT-CLPM
+chmod +x install.sh
+./install.sh
+```
 
-### الدعم والتواصل
-للتبليغ عن المشكلات أو طلب ميزات جديدة، يرجى زيارة صفحة المشروع على GitHub:  
-[https://github.com/SalehGNUTUX/gt-clpm](https://github.com/SalehGNUTUX/gt-clpm)
+### 🗑️ إلغاء التثبيت
+
+#### إلغاء التثبيت عن بُعد:
+```bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash
+```
+
+#### إلغاء التثبيت المحلي:
+```bash
+sudo rm -f /usr/local/bin/gt-clpm
+rm -f ~/.gt-clpm-lang
+rm -f ~/.gt-clpm-backup-*.txt
+```
+
+### 🎯 طريقة الاستخدام
+بعد التثبيت، شغّل البرنامج بالأمر:
+```bash
+gt-clpm
+```
+
+<img width="1440" height="900" alt="واجهة البرنامج" src="https://github.com/user-attachments/assets/91287643-8f19-4af6-a78e-23cfea894b68" />
+
+### 📁 الهيكل التنظيمي
+```
+GT-CLPM/
+├── install.sh          # مثبت سريع
+├── uninstall.sh        # مزيل سريع
+└── GT-CLPM/
+    ├── gt-clpm.sh      # البرنامج الرئيسي
+    └── installer.sh    # المثبت التفصيلي
+```
+
+### 🐛 الإبلاغ عن المشكلات
+لتبليغ عن الأخطاء أو اقتراح ميزات جديدة:  
+[📝 إنشاء إشكالية على GitHub](https://github.com/SalehGNUTUX/GT-CLPM/issues)
 
 ---
 
 ## 🇬🇧 English
 
-### Overview
-GT-CLPM-CLI is a comprehensive command-line package manager for GNU/Linux systems. It lets you install, remove, update, and search packages through a unified terminal interface supporting the most popular Linux package managers.
+### 🚀 Overview
+GT-CLPM is a comprehensive command-line package manager for GNU/Linux systems. It provides a unified terminal interface for managing packages across multiple package managers.
 
-### Features
-- Multi-language support (Arabic & English)
-- Install, remove, update, upgrade packages
-- Search and display package information
-- Supports Debian/Ubuntu, Fedora, Arch, openSUSE, Solus, and more
-- System maintenance tools and backup
-- Flatpak and Snap support (if available)
-<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/754d5049-e673-42d3-9c97-3c574f337917" />
+### ✨ Key Features
+- 🌐 Multi-language support (Arabic & English)
+- 📦 Support for 12+ package managers
+- 📱 Flatpak and Snap integration
+- ⚙️ System maintenance and backup tools
+- 🎨 Colorful and user-friendly interface
+- 🔧 Automatic broken package repair
 
-### Usage
-Run the program directly from your terminal:
+### 📋 Supported Package Managers
+- **APT** (Debian, Ubuntu)
+- **DNF/YUM** (Fedora, RHEL)
+- **Pacman** (Arch, Manjaro)
+- **Zypper** (openSUSE)
+- **Eopkg** (Solus)
+- **XBPS** (Void Linux)
+- **Emerge** (Gentoo)
+- **PKG** (FreeBSD)
+- **APK** (Alpine)
+- **Nix** (NixOS)
+
+### 🛠️ Installation
+
+#### Quick Install (GitHub Repository):
 ```bash
-./gt-clpm-cli
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
 ```
-Or use the AppImage:
+
+#### Using wget:
 ```bash
-./GT-CLPM-CLI-x86_64.AppImage
+wget -q -O - https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
 ```
-A textual interactive menu will appear; navigate options using numbers or arrow keys (depending on implementation).
 
-### Requirements
-- Bash shell
-- Appropriate package manager (apt, dnf, pacman, ...)
-- Root privileges for some operations
+#### Manual Installation:
+```bash
+git clone https://github.com/SalehGNUTUX/GT-CLPM.git
+cd GT-CLPM
+chmod +x install.sh
+./install.sh
+```
 
-### Support & Contact
-To report issues or request features, please visit the project page on GitHub:  
-[https://github.com/SalehGNUTUX/gt-clpm](https://github.com/SalehGNUTUX/gt-clpm)
+### 🗑️ Uninstallation
+
+#### Remote Uninstall:
+```bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash
+```
+
+#### Local Uninstall:
+```bash
+sudo rm -f /usr/local/bin/gt-clpm
+rm -f ~/.gt-clpm-lang
+rm -f ~/.gt-clpm-backup-*.txt
+```
+
+### 🎯 Usage
+After installation, run the program with:
+```bash
+gt-clpm
+```
+
+<img width="1440" height="900" alt="Program Interface" src="https://github.com/user-attachments/assets/754d5049-e673-42d3-9c97-3c574f337917" />
+
+### 📁 Project Structure
+```
+GT-CLPM/
+├── install.sh          # Quick installer
+├── uninstall.sh        # Quick uninstaller
+└── GT-CLPM/
+    ├── gt-clpm.sh      # Main program
+    └── installer.sh    # Detailed installer
+```
+
+### 🐛 Reporting Issues
+To report bugs or request new features:  
+[📝 Create GitHub Issue](https://github.com/SalehGNUTUX/GT-CLPM/issues)
+
+---
+
+## 📄 الرخصة
+هذا المشروع مرخص تحت رخصة GPLv2. راجع ملف LICENSE للتفاصيل.
+
+## 👥 المساهمة
+المساهمات مرحب بها! لا تتردد في عمل Fork وعمل Pull Request.
+
+## 📞 الدعم
+- 📧 البريد الإلكتروني: [إضافة بريدك هنا]
+- 💬 GitHub Issues: [رابط Issues](https://github.com/SalehGNUTUX/GT-CLPM/issues)
+
