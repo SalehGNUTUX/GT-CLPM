@@ -16,12 +16,11 @@ NC='\033[0m'
 # Configuration
 REPO_URL="https://github.com/SalehGNUTUX/GT-CLPM"
 SCRIPT_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm.sh"
-ICONS_URL="https://github.com/SalehGNUTUX/GT-CLPM/raw/main/GT-CLPM/gt-usdr%20APPIAMGE%20BIULD/GT-CLPM-CLI.AppDir/usr/share/icons/hicolor"
+ICONS_BASE_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-usdr%20APPIAMGE%20BIULD/GT-CLPM-CLI.AppDir/usr/share/icons/hicolor"
 INSTALL_DIR="/usr/local/bin"
 SCRIPT_NAME="gt-clpm"
 DESKTOP_ENTRY_DIR="/usr/share/applications"
 ICONS_DIR="/usr/share/icons/hicolor"
-DESKTOP_ENTRY_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-usdr%20APPIAMGE%20BIULD/GT-CLPM-CLI.AppDir/usr/share/applications/gt-clpm-cli.desktop"
 
 # Function to print colored output
 print_status() {
@@ -99,18 +98,34 @@ install_icons() {
     local temp_icons_dir="/tmp/gt-clpm-icons"
     mkdir -p "$temp_icons_dir"
     
-    # Icon sizes to download
+    # Icon sizes to download (based on actual repository structure)
     local icon_sizes=("16x16" "32x32" "48x48" "64x64" "128x128" "256x256" "512x512")
+    local icon_name="gt-clpm-cli-icon.png"
+    local installed_icon_name="gt-clpm.png"
     
     for size in "${icon_sizes[@]}"; do
-        local icon_url="${ICONS_URL}/${size}/apps/gt-clpm-cli.png"
+        local icon_url="${ICONS_BASE_URL}/${size}/apps/${icon_name}"
         local icon_dir="$ICONS_DIR/${size}/apps"
         
         # Download icon
+        print_status "Downloading ${size} icon..."
         if command -v curl &> /dev/null; then
-            curl -fsSL "$icon_url" -o "$temp_icons_dir/gt-clpm-${size}.png" 2>/dev/null || true
+            if curl -fsSL "$icon_url" -o "$temp_icons_dir/gt-clpm-${size}.png"; then
+                print_status "Downloaded ${size} icon successfully"
+            else
+                print_warning "Failed to download ${size} icon"
+                continue
+            fi
         elif command -v wget &> /dev/null; then
-            wget -q "$icon_url" -O "$temp_icons_dir/gt-clpm-${size}.png" 2>/dev/null || true
+            if wget -q "$icon_url" -O "$temp_icons_dir/gt-clpm-${size}.png"; then
+                print_status "Downloaded ${size} icon successfully"
+            else
+                print_warning "Failed to download ${size} icon"
+                continue
+            fi
+        else
+            print_warning "Cannot download icons - no download tool available"
+            return 1
         fi
         
         # Install icon if downloaded successfully
@@ -118,14 +133,14 @@ install_icons() {
             # Create icon directory
             if [[ ! -w "$ICONS_DIR" ]]; then
                 sudo mkdir -p "$icon_dir"
-                sudo cp "$temp_icons_dir/gt-clpm-${size}.png" "$icon_dir/gt-clpm.png"
+                sudo cp "$temp_icons_dir/gt-clpm-${size}.png" "$icon_dir/$installed_icon_name"
+                sudo chmod 644 "$icon_dir/$installed_icon_name"
             else
                 mkdir -p "$icon_dir"
-                cp "$temp_icons_dir/gt-clpm-${size}.png" "$icon_dir/gt-clpm.png"
+                cp "$temp_icons_dir/gt-clpm-${size}.png" "$icon_dir/$installed_icon_name"
+                chmod 644 "$icon_dir/$installed_icon_name"
             fi
-            print_status "Installed ${size} icon"
-        else
-            print_warning "Icon for size ${size} not available"
+            print_status "Installed ${size} icon to $icon_dir/$installed_icon_name"
         fi
     done
     
@@ -143,28 +158,29 @@ Type=Application
 Name=GT-CLPM
 GenericName=Package Manager
 Comment=GNUTUX Command Line Package Manager
-Exec=gnome-terminal -- bash -c 'gt-clpm; exec bash'
+Exec=gt-clpm
 Icon=gt-clpm
 Categories=System;PackageManager;
 Terminal=true
 StartupNotify=true
-Keywords=package;manager;install;remove;update;system;
+Keywords=package;manager;install;remove;update;system;linux;
 
 # Arabic metadata
-Name[ar]=جي تي-سي إل بي إم
+Name[ar]=GT-CLPM
 Comment[ar]=مدير حزم سطر الأوامر من جنوتكس
-GenericName[ar]=مدير الحزم"
+GenericName[ar]=مدير الحزم
+Keywords[ar]=حزم;مدير;تثبيت;إزالة;تحديث;نظام;لينكس"
 
     # Create desktop entry file
     if [[ ! -w "$DESKTOP_ENTRY_DIR" ]]; then
         echo "$desktop_entry" | sudo tee "$DESKTOP_ENTRY_DIR/gt-clpm.desktop" > /dev/null
-        sudo chmod +x "$DESKTOP_ENTRY_DIR/gt-clpm.desktop"
+        sudo chmod 644 "$DESKTOP_ENTRY_DIR/gt-clpm.desktop"
     else
         echo "$desktop_entry" > "$DESKTOP_ENTRY_DIR/gt-clpm.desktop"
-        chmod +x "$DESKTOP_ENTRY_DIR/gt-clpm.desktop"
+        chmod 644 "$DESKTOP_ENTRY_DIR/gt-clpm.desktop"
     fi
     
-    print_status "Desktop entry created successfully!"
+    print_status "Desktop entry created at $DESKTOP_ENTRY_DIR/gt-clpm.desktop"
 }
 
 # Update desktop database
@@ -176,6 +192,8 @@ update_desktop_database() {
         else
             update-desktop-database "$DESKTOP_ENTRY_DIR"
         fi
+    else
+        print_warning "update-desktop-database not found, skipping desktop database update"
     fi
     
     # Also update icon cache
@@ -186,6 +204,8 @@ update_desktop_database() {
         else
             gtk-update-icon-cache -f -t "$ICONS_DIR"
         fi
+    else
+        print_warning "gtk-update-icon-cache not found, skipping icon cache update"
     fi
 }
 
@@ -199,17 +219,31 @@ verify_installation() {
     if ! command -v "$SCRIPT_NAME" &> /dev/null; then
         print_error "Script not found in PATH"
         success=false
+    else
+        print_status "✓ Script installed and accessible"
     fi
     
     # Check if desktop entry exists
-    if [[ ! -f "$DESKTOP_ENTRY_DIR/gt-clpm.desktop" ]]; then
+    if [[ -f "$DESKTOP_ENTRY_DIR/gt-clpm.desktop" ]]; then
+        print_status "✓ Desktop entry created"
+    else
         print_warning "Desktop entry not found"
     fi
     
+    # Check if some icons are installed
+    local icon_check_path="$ICONS_DIR/64x64/apps/gt-clpm.png"
+    if [[ -f "$icon_check_path" ]]; then
+        print_status "✓ Icons installed"
+    else
+        print_warning "Icons may not be fully installed"
+    fi
+    
     if [[ "$success" == "true" ]]; then
-        print_status "Installation completed successfully!"
+        print_status "✓ Installation completed successfully!"
+        return 0
     else
         print_error "Installation completed with warnings"
+        return 1
     fi
 }
 
@@ -222,17 +256,18 @@ show_success() {
     echo
     echo -e "${BLUE}🎉 GT-CLPM has been successfully installed!${NC}"
     echo
-    echo -e "${YELLOW}📝 Usage:${NC}"
+    echo -e "${YELLOW}📝 Usage Methods:${NC}"
     echo -e "  ${GREEN}Terminal:${NC} gt-clpm"
     echo -e "  ${GREEN}Desktop:${NC} Search for 'GT-CLPM' in your application menu"
+    echo -e "  ${GREEN}Application Menu:${NC} Look in System Tools or System category"
     echo
-    echo -e "${YELLOW}✨ Features:${NC}"
-    echo -e "  📦 Support for 12+ package managers"
-    echo -e "  📱 Flatpak and Snap integration"
-    echo -e "  ⚙️  System tools and utilities"
-    echo -e "  🌐 Multi-language support (Arabic/English)"
+    echo -e "${YELLOW}✨ Features Installed:${NC}"
+    echo -e "  📦 Main program in /usr/local/bin/"
+    echo -e "  🖼️  Application icons (7 sizes)"
+    echo -e "  🖥️  Desktop menu entry"
+    echo -e "  🌐 Multi-language support"
     echo
-    echo -e "${BLUE}🚀 Start using:${NC} ${GREEN}gt-clpm${NC}"
+    echo -e "${BLUE}🚀 Start using:${NC} ${GREEN}gt-clpm${NC} ${YELLOW}or find it in your applications menu${NC}"
     echo
 }
 
@@ -244,6 +279,8 @@ main() {
     echo "║              Version 1.0              ║"
     echo "╚════════════════════════════════════════╝"
     echo -e "${NC}"
+    echo -e "${YELLOW}Installing GT-CLPM with full desktop integration...${NC}"
+    echo
     
     check_root
     download_script
