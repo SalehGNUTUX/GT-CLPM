@@ -17,7 +17,7 @@ NC='\033[0m'
 
 # Configuration
 REPO_URL="https://github.com/SalehGNUTUX/GT-CLPM"
-SCRIPT_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/gt-clpm-v1.1.sh"
+SCRIPT_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/blob/main/gt-clpm-v1.1.sh"
 ICONS_BASE_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-usdr%20APPIAMGE%20BIULD/GT-CLPM-CLI.AppDir/usr/share/icons/hicolor"
 INSTALL_DIR="/usr/local/bin"
 SCRIPT_NAME="gt-clpm"
