@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # GT-CLPM Uninstaller
-# Version: 1.0
+# Version: 1.1
 # Developer: GNUTUX
 
 set -e
@@ -11,6 +11,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
+CYAN='\033[0;36m'
 NC='\033[0m'
 
 # Configuration
@@ -20,6 +21,7 @@ DESKTOP_ENTRY_DIR="/usr/share/applications"
 ICONS_DIR="/usr/share/icons/hicolor"
 LANG_FILE="$HOME/.gt-clpm-lang"
 BACKUP_FILES="$HOME/gt-clpm-backup-*.txt"
+VERSION="1.1"
 
 # Function to print colored output
 print_status() {
@@ -34,81 +36,111 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+print_success() {
+    echo -e "${CYAN}[SUCCESS]${NC} $1"
+}
+
 # Remove installed script
 remove_script() {
     print_status "Removing GT-CLPM script..."
     
-    if [[ -f "$INSTALL_DIR/$SCRIPT_NAME" ]]; then
-        if [[ ! -w "$INSTALL_DIR" ]]; then
-            sudo rm -f "$INSTALL_DIR/$SCRIPT_NAME"
-        else
-            rm -f "$INSTALL_DIR/$SCRIPT_NAME"
+    local script_paths=(
+        "$INSTALL_DIR/$SCRIPT_NAME"
+        "/usr/bin/$SCRIPT_NAME"
+        "/bin/$SCRIPT_NAME"
+    )
+    
+    local removed=false
+    
+    for script_path in "${script_paths[@]}"; do
+        if [[ -f "$script_path" ]]; then
+            if [[ ! -w "$(dirname "$script_path")" ]]; then
+                sudo rm -f "$script_path"
+            else
+                rm -f "$script_path"
+            fi
+            print_success "Removed script: $script_path"
+            removed=true
         fi
-        print_status "Script removed from $INSTALL_DIR"
-    else
-        print_warning "Script not found in $INSTALL_DIR"
+    done
+    
+    if [[ "$removed" == "false" ]]; then
+        print_warning "GT-CLPM script not found in standard locations"
     fi
 }
 
 # Remove desktop entry
 remove_desktop_entry() {
-    if [[ -f "$DESKTOP_ENTRY_DIR/gt-clpm.desktop" ]]; then
-        print_status "Removing desktop entry..."
-        
-        if [[ ! -w "$DESKTOP_ENTRY_DIR" ]]; then
-            sudo rm -f "$DESKTOP_ENTRY_DIR/gt-clpm.desktop"
-        else
-            rm -f "$DESKTOP_ENTRY_DIR/gt-clpm.desktop"
+    local desktop_files=(
+        "$DESKTOP_ENTRY_DIR/gt-clpm.desktop"
+        "/usr/local/share/applications/gt-clpm.desktop"
+        "$HOME/.local/share/applications/gt-clpm.desktop"
+    )
+    
+    local removed=false
+    
+    for desktop_file in "${desktop_files[@]}"; do
+        if [[ -f "$desktop_file" ]]; then
+            if [[ ! -w "$(dirname "$desktop_file")" ]]; then
+                sudo rm -f "$desktop_file"
+            else
+                rm -f "$desktop_file"
+            fi
+            print_success "Removed desktop entry: $desktop_file"
+            removed=true
         fi
-        print_status "Desktop entry removed"
-    else
-        print_warning "Desktop entry not found"
+    done
+    
+    if [[ "$removed" == "false" ]]; then
+        print_warning "No desktop entries found"
     fi
 }
 
 # Remove icons
 remove_icons() {
-    print_status "Removing icons..."
+    print_status "Removing application icons..."
     
     local icon_sizes=("16x16" "32x32" "48x48" "64x64" "128x128" "256x256" "512x512")
-    local icon_name="gt-clpm.png"
+    local icon_names=("gt-clpm.png" "gt-clpm-cli-icon.png")
     local icons_removed=0
     
     for size in "${icon_sizes[@]}"; do
-        local icon_path="$ICONS_DIR/${size}/apps/$icon_name"
-        if [[ -f "$icon_path" ]]; then
-            if [[ ! -w "$ICONS_DIR" ]]; then
-                sudo rm -f "$icon_path"
-            else
-                rm -f "$icon_path"
-            fi
-            ((icons_removed++))
-            print_status "Removed ${size} icon"
-            
-            # Remove empty directories
-            local apps_dir="$ICONS_DIR/${size}/apps"
-            local size_dir="$ICONS_DIR/${size}"
-            
-            if [[ -d "$apps_dir" ]] && [[ -z "$(ls -A "$apps_dir" 2>/dev/null)" ]]; then
+        for icon_name in "${icon_names[@]}"; do
+            local icon_path="$ICONS_DIR/${size}/apps/$icon_name"
+            if [[ -f "$icon_path" ]]; then
                 if [[ ! -w "$ICONS_DIR" ]]; then
-                    sudo rmdir "$apps_dir" 2>/dev/null || true
+                    sudo rm -f "$icon_path"
                 else
-                    rmdir "$apps_dir" 2>/dev/null || true
+                    rm -f "$icon_path"
+                fi
+                ((icons_removed++))
+                print_success "Removed ${size} icon: $icon_name"
+                
+                # Remove empty directories
+                local apps_dir="$ICONS_DIR/${size}/apps"
+                local size_dir="$ICONS_DIR/${size}"
+                
+                if [[ -d "$apps_dir" ]] && [[ -z "$(ls -A "$apps_dir" 2>/dev/null)" ]]; then
+                    if [[ ! -w "$ICONS_DIR" ]]; then
+                        sudo rmdir "$apps_dir" 2>/dev/null || true
+                    else
+                        rmdir "$apps_dir" 2>/dev/null || true
+                    fi
+                fi
+                
+                if [[ -d "$size_dir" ]] && [[ -z "$(ls -A "$size_dir" 2>/dev/null)" ]]; then
+                    if [[ ! -w "$ICONS_DIR" ]]; then
+                        sudo rmdir "$size_dir" 2>/dev/null || true
+                    else
+                        rmdir "$size_dir" 2>/dev/null || true
+                    fi
                 fi
             fi
-            
-            if [[ -d "$size_dir" ]] && [[ -z "$(ls -A "$size_dir" 2>/dev/null)" ]]; then
-                if [[ ! -w "$ICONS_DIR" ]]; then
-                    sudo rmdir "$size_dir" 2>/dev/null || true
-                else
-                    rmdir "$size_dir" 2>/dev/null || true
-                fi
-            fi
-        fi
+        done
     done
     
     if [[ $icons_removed -gt 0 ]]; then
-        print_status "Removed $icons_removed icon files"
+        print_success "Removed $icons_removed icon files"
     else
         print_warning "No icons found to remove"
     fi
@@ -116,14 +148,21 @@ remove_icons() {
 
 # Remove configuration files
 remove_config_files() {
-    print_status "Removing configuration files..."
+    print_status "Removing configuration and data files..."
     
     # Remove language file
     if [[ -f "$LANG_FILE" ]]; then
         rm -f "$LANG_FILE"
-        print_status "Language file removed"
+        print_success "Language file removed: $LANG_FILE"
     else
         print_warning "Language file not found"
+    fi
+    
+    # Remove any cache files
+    local cache_dir="$HOME/.cache/gt-clpm"
+    if [[ -d "$cache_dir" ]]; then
+        rm -rf "$cache_dir"
+        print_success "Cache directory removed: $cache_dir"
     fi
     
     # Ask about backup files
@@ -133,25 +172,44 @@ remove_config_files() {
         echo
         if [[ $REPLY =~ ^[Yy]$ ]]; then
             rm -f $BACKUP_FILES
-            print_status "Backup files removed"
+            print_success "Backup files removed"
         else
             print_status "Backup files kept in $HOME"
         fi
     else
         print_status "No backup files found"
     fi
+    
+    # Remove any temporary files
+    local temp_files=(
+        "/tmp/gt-clpm"
+        "/tmp/$SCRIPT_NAME"
+    )
+    
+    for temp_file in "${temp_files[@]}"; do
+        if [[ -f "$temp_file" ]] || [[ -d "$temp_file" ]]; then
+            rm -rf "$temp_file"
+        fi
+    done
 }
 
 # Update desktop database and icon cache
 update_system_databases() {
     # Update desktop database
-    if command -v update-desktop-database &> /dev/null && [[ -d "$DESKTOP_ENTRY_DIR" ]]; then
+    if command -v update-desktop-database &> /dev/null; then
         print_status "Updating desktop database..."
-        if [[ ! -w "$DESKTOP_ENTRY_DIR" ]]; then
-            sudo update-desktop-database "$DESKTOP_ENTRY_DIR"
-        else
-            update-desktop-database "$DESKTOP_ENTRY_DIR"
-        fi
+        local desktop_dirs=("$DESKTOP_ENTRY_DIR" "/usr/local/share/applications")
+        
+        for dir in "${desktop_dirs[@]}"; do
+            if [[ -d "$dir" ]]; then
+                if [[ ! -w "$dir" ]]; then
+                    sudo update-desktop-database "$dir"
+                else
+                    update-desktop-database "$dir"
+                fi
+            fi
+        done
+        print_success "Desktop database updated"
     else
         print_warning "update-desktop-database not found, skipping"
     fi
@@ -164,6 +222,7 @@ update_system_databases() {
         else
             gtk-update-icon-cache -f -t "$ICONS_DIR"
         fi
+        print_success "Icon cache updated"
     else
         print_warning "gtk-update-icon-cache not found, skipping"
     fi
@@ -175,18 +234,33 @@ verify_uninstallation() {
     
     local success=true
     
+    # Check if script is removed from PATH
     if command -v "$SCRIPT_NAME" &> /dev/null; then
         print_error "Script still found in PATH"
         success=false
     else
-        print_status "✓ Script removed from PATH"
+        print_success "✓ Script removed from PATH"
     fi
     
-    if [[ -f "$DESKTOP_ENTRY_DIR/gt-clpm.desktop" ]]; then
-        print_error "Desktop entry still exists"
-        success=false
+    # Check if desktop entries are removed
+    local desktop_check_paths=(
+        "$DESKTOP_ENTRY_DIR/gt-clpm.desktop"
+        "/usr/local/share/applications/gt-clpm.desktop"
+    )
+    
+    local desktop_removed=true
+    for path in "${desktop_check_paths[@]}"; do
+        if [[ -f "$path" ]]; then
+            desktop_removed=false
+            break
+        fi
+    done
+    
+    if [[ "$desktop_removed" == "true" ]]; then
+        print_success "✓ Desktop entries removed"
     else
-        print_status "✓ Desktop entry removed"
+        print_error "Some desktop entries still exist"
+        success=false
     fi
     
     # Check if main icon is removed
@@ -195,11 +269,11 @@ verify_uninstallation() {
         print_error "Some icons still exist"
         success=false
     else
-        print_status "✓ Icons removed"
+        print_success "✓ Icons removed"
     fi
     
     if [[ "$success" == "true" ]]; then
-        print_status "✓ GT-CLPM successfully uninstalled!"
+        print_success "✓ GT-CLPM v$VERSION successfully uninstalled!"
         return 0
     else
         print_error "Uninstallation may not be complete"
@@ -214,16 +288,19 @@ show_completion() {
     echo -e "${GREEN}║         UNINSTALLATION COMPLETE        ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════╝${NC}"
     echo
-    echo -e "${BLUE}🗑️  GT-CLPM has been completely removed from your system!${NC}"
+    echo -e "${BLUE}🗑️  GT-CLPM v$VERSION has been completely removed from your system!${NC}"
     echo
     echo -e "${YELLOW}📝 What was removed:${NC}"
-    echo -e "  • Program executable from $INSTALL_DIR"
-    echo -e "  • Desktop application entry"
-    echo -e "  • Application icons (7 sizes)"
-    echo -e "  • User configuration files"
+    echo -e "  📦 ${GREEN}Program executable${NC} from system PATH"
+    echo -e "  🖥️  ${GREEN}Desktop application entries${NC} from menu"
+    echo -e "  🖼️  ${GREEN}Application icons${NC} (all sizes)"
+    echo -e "  ⚙️  ${GREEN}User configuration${NC} and cache files"
+    echo -e "  💾 ${GREEN}Backup files${NC} (if selected)"
     echo
     echo -e "${GREEN}💡 You can reinstall anytime using:${NC}"
-    echo -e "  curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash"
+    echo -e "  ${CYAN}curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash${NC}"
+    echo
+    echo -e "${YELLOW}🙏 Thank you for using GT-CLPM!${NC}"
     echo
 }
 
@@ -232,17 +309,18 @@ main() {
     echo -e "${BLUE}"
     echo "╔════════════════════════════════════════╗"
     echo "║           GT-CLPM Uninstaller         ║"
-    echo "║              Version 1.0              ║"
+    echo "║              Version $VERSION              ║"
     echo "╚════════════════════════════════════════╝"
     echo -e "${NC}"
     
     # Confirm uninstallation
-    echo -e "${YELLOW}This will completely remove GT-CLPM from your system.${NC}"
+    echo -e "${YELLOW}This will completely remove GT-CLPM v$VERSION from your system.${NC}"
     echo -e "${YELLOW}This includes:${NC}"
-    echo -e "  • Program executable from $INSTALL_DIR"
-    echo -e "  • Desktop menu entry"
-    echo -e "  • Application icons (all sizes)"
-    echo -e "  • Configuration files"
+    echo -e "  📦 ${GREEN}Program executable${NC} from $INSTALL_DIR and other locations"
+    echo -e "  🖥️  ${GREEN}Desktop menu entries${NC} from all locations"
+    echo -e "  🖼️  ${GREEN}Application icons${NC} (all sizes and resolutions)"
+    echo -e "  ⚙️  ${GREEN}Configuration files${NC} and user data"
+    echo -e "  💾 ${GREEN}Backup files${NC} (optional)"
     echo
     read -p "Are you sure you want to continue? (y/N): " -n 1 -r
     echo
