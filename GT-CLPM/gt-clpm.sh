@@ -125,6 +125,13 @@ declare -A MESSAGES_EN=(
     ["enter_number"]="Enter package number to install"
     ["install_package_num"]="Install package number"
     ["return_to_menu"]="Return to menu"
+    ["search_first"]="Search first"
+    ["refresh_flathub"]="🔄 Refresh Flathub Repository"
+    ["installed"]="[installed]"
+    ["search_programs"]="🔍 Search for programs"
+    ["search_packages"]="📦 Search for packages"
+    ["applications"]="💻 Applications"
+    ["libraries"]="📚 Libraries and dependencies"
 )
 
 declare -A MESSAGES_AR=(
@@ -218,6 +225,13 @@ declare -A MESSAGES_AR=(
     ["enter_number"]="أدخل رقم الحزمة للتثبيت"
     ["install_package_num"]="تثبيت الحزمة رقم"
     ["return_to_menu"]="العودة للقائمة"
+    ["search_first"]="البحث أولاً"
+    ["refresh_flathub"]="🔄 إنعاش مستودع فلاتهاب"
+    ["installed"]="[مثبت]"
+    ["search_programs"]="🔍 البحث عن البرامج"
+    ["search_packages"]="📦 البحث عن الحزم"
+    ["applications"]="💻 التطبيقات"
+    ["libraries"]="📚 المكتبات والإعتماديات"
 )
 
 
@@ -385,7 +399,396 @@ install_snap_system() {
     esac
 }
 
-# Enhanced search function with interactive installation
+# Enhanced search function for PROGRAMS only - FIXED VERSION
+search_programs() {
+    local package="$1"
+    local pm=$(detect_package_manager)
+
+    if [[ -z "$package" ]]; then
+        echo -e "${RED}$(get_msg "error") $(get_msg "no_package")${NC}"
+        return 1
+    fi
+
+    echo -e "${CYAN}$(get_msg "searching") $package ($(get_msg "applications"))...${NC}"
+
+    local packages=()
+    local display_lines=()
+    local offset=0
+    local limit=15
+
+    # معالجة مصطلح البحث - البحث الذكي
+    local search_term=""
+    if [[ "$package" =~ [[:space:]] ]]; then
+        # إذا كان البحث يحتوي على مسافات، استخدم بحث أوسع
+        search_term=$(echo "$package" | sed 's/[[:space:]]+/.*/g')
+    else
+        # إذا كان كلمة واحدة، ابحث عن الحزم التي تبدأ بهذه الكلمة
+        search_term="^$package"
+    fi
+
+    while true; do
+        packages=()
+        display_lines=()
+        local i=1
+
+        case $pm in
+            "apt")
+                echo -e "${YELLOW}Searching...${NC}"
+
+                # استراتيجية بحث ذكية
+                if [[ "$package" =~ [[:space:]] ]]; then
+                    # بحث بالمسافات: بحث في الأسماء والوصف
+                    while IFS= read -r line; do
+                        if [[ $line =~ ^([^[:space:]]+)[[:space:]]+-[[:space:]]+(.*)$ ]]; then
+                            pkg_name="${BASH_REMATCH[1]}"
+                            description="${BASH_REMATCH[2]}"
+
+                            # فلترة ذكية للتطبيقات
+                            if [[ $pkg_name =~ -dev$ || $pkg_name =~ -dbg$ || $pkg_name =~ -doc$ ]] ||
+                               [[ $pkg_name =~ -data$ || $pkg_name =~ -common$ ]] ||
+                               [[ $pkg_name =~ ^lib[0-9] ]] || [[ $pkg_name =~ ^python3?-[0-9] ]] ||
+                               [[ $pkg_name =~ ^gir1.2- ]] || [[ $description =~ [Pp]lugin ]] &&
+                               [[ $description =~ [Ff]or ]] ||
+                               [[ $pkg_name =~ -plugin$ ]] || [[ $description =~ [Ll]ibrary ]] &&
+                               [[ $description =~ [Dd]evelopment ]] ||
+                               [[ $pkg_name =~ ^.*-plugin-.* ]] || [[ $pkg_name =~ ^.*-extension$ ]]; then
+                                continue
+                            fi
+
+                            # تجنب التكرار
+                            if [[ " ${packages[@]} " =~ " ${pkg_name} " ]]; then
+                                continue
+                            fi
+
+                            local installed_marker=""
+                            if dpkg-query -W "$pkg_name" &>/dev/null; then
+                                installed_marker=" $(get_msg "installed")"
+                            fi
+
+                            # معلومات الإصدار
+                            version_info=$(apt-cache policy "$pkg_name" 2>/dev/null | grep -oP 'Candidate: \K.*' | head -1)
+                            if [[ -n "$version_info" && "$version_info" != "(none)" ]]; then
+                                display_lines[i]="$pkg_name/stable $version_info$installed_marker"
+                            else
+                                display_lines[i]="$pkg_name$installed_marker"
+                            fi
+
+                            packages[i]="$pkg_name"
+
+                            if [[ -n "$description" ]]; then
+                                display_lines[i]="${display_lines[i]}\n  $description"
+                            fi
+
+                            ((i++))
+                            if [[ $i -gt $((limit + offset)) ]]; then
+                                break
+                            fi
+                        fi
+                    done < <(apt-cache search "$package" 2>/dev/null | sort -u | head -100)
+                else
+                    # بحث بكلمة واحدة: ركز على الحزم التي تبدأ بالكلمة
+                    while IFS= read -r line; do
+                        if [[ $line =~ ^([^[:space:]]+)[[:space:]]+-[[:space:]]+(.*)$ ]]; then
+                            pkg_name="${BASH_REMATCH[1]}"
+                            description="${BASH_REMATCH[2]}"
+
+                            # فلترة صارمة للبحث بكلمة واحدة
+                            if [[ $pkg_name =~ -dev$ || $pkg_name =~ -dbg$ || $pkg_name =~ -doc$ ]] ||
+                               [[ $pkg_name =~ -data$ || $pkg_name =~ -common$ ]] ||
+                               [[ $pkg_name =~ ^lib[0-9] ]] || [[ $pkg_name =~ ^python3?-[0-9] ]] ||
+                               [[ $pkg_name =~ ^gir1.2- ]] || [[ $description =~ [Pp]lugin ]] ||
+                               [[ $pkg_name =~ -plugin$ ]] || [[ $description =~ [Ll]ibrary ]] ||
+                               [[ $pkg_name =~ ^.*-plugin-.* ]] || [[ $pkg_name =~ ^.*-extension$ ]] ||
+                               [[ $pkg_name =~ ^fonts- ]] || [[ $pkg_name =~ ^golang- ]] ||
+                               [[ $pkg_name =~ ^erlang- ]] || [[ $pkg_name =~ ^astro- ]] ||
+                               [[ $pkg_name =~ ^casacore- ]] || [[ $description =~ [Ff]ont ]] ||
+                               [[ $description =~ [Gg]o[[:space:]]+[Ll]ibrary ]] ||
+                               [[ $description =~ [Ee]rlang ]] || [[ $description =~ [Aa]stro ]] ||
+                               [[ $pkg_name =~ virtual-observatory ]] || [[ $pkg_name =~ radio-observatory ]]; then
+                                continue
+                            fi
+
+                            # التركيز على التطبيقات التي تبدأ بالكلمة المطلوبة
+                            if [[ ! $pkg_name =~ ^$package ]] &&
+                               [[ ! $pkg_name =~ ^$package- ]] &&
+                               [[ $pkg_name != "$package" ]]; then
+                                continue
+                            fi
+
+                            # تجنب التكرار
+                            if [[ " ${packages[@]} " =~ " ${pkg_name} " ]]; then
+                                continue
+                            fi
+
+                            local installed_marker=""
+                            if dpkg-query -W "$pkg_name" &>/dev/null; then
+                                installed_marker=" $(get_msg "installed")"
+                            fi
+
+                            # معلومات الإصدار
+                            version_info=$(apt-cache policy "$pkg_name" 2>/dev/null | grep -oP 'Candidate: \K.*' | head -1)
+                            if [[ -n "$version_info" && "$version_info" != "(none)" ]]; then
+                                display_lines[i]="$pkg_name/stable $version_info$installed_marker"
+                            else
+                                display_lines[i]="$pkg_name$installed_marker"
+                            fi
+
+                            packages[i]="$pkg_name"
+
+                            if [[ -n "$description" ]]; then
+                                display_lines[i]="${display_lines[i]}\n  $description"
+                            fi
+
+                            ((i++))
+                            if [[ $i -gt $((limit + offset)) ]]; then
+                                break
+                            fi
+                        fi
+                    done < <(apt-cache search --names-only "^$package" 2>/dev/null | sort -u | head -100)
+
+                    # إذا لم توجد نتائج، جرب بحثاً أوسع
+                    if [[ ${#packages[@]} -eq 0 ]]; then
+                        while IFS= read -r line; do
+                            if [[ $line =~ ^([^[:space:]]+)[[:space:]]+-[[:space:]]+(.*)$ ]]; then
+                                pkg_name="${BASH_REMATCH[1]}"
+                                description="${BASH_REMATCH[2]}"
+
+                                # فلترة مخففة للبحث الواسع
+                                if [[ $pkg_name =~ -dev$ || $pkg_name =~ -dbg$ || $pkg_name =~ -doc$ ]] ||
+                                   [[ $pkg_name =~ -data$ || $pkg_name =~ -common$ ]] ||
+                                   [[ $pkg_name =~ ^lib[0-9] ]] || [[ $pkg_name =~ ^python3?-[0-9] ]] ||
+                                   [[ $pkg_name =~ ^gir1.2- ]] || [[ $pkg_name =~ -plugin$ ]] ||
+                                   [[ $description =~ [Pp]lugin.*[Ff]or ]] || [[ $description =~ [Dd]evelopment.*[Ff]iles ]]; then
+                                    continue
+                                fi
+
+                                # التركيز على الحزم التي تحتوي على الكلمة
+                                if [[ ! $pkg_name =~ $package ]] && [[ ! $description =~ $package ]]; then
+                                    continue
+                                fi
+
+                                # تجنب التكرار
+                                if [[ " ${packages[@]} " =~ " ${pkg_name} " ]]; then
+                                    continue
+                                fi
+
+                                local installed_marker=""
+                                if dpkg-query -W "$pkg_name" &>/dev/null; then
+                                    installed_marker=" $(get_msg "installed")"
+                                fi
+
+                                version_info=$(apt-cache policy "$pkg_name" 2>/dev/null | grep -oP 'Candidate: \K.*' | head -1)
+                                if [[ -n "$version_info" && "$version_info" != "(none)" ]]; then
+                                    display_lines[i]="$pkg_name/stable $version_info$installed_marker"
+                                else
+                                    display_lines[i]="$pkg_name$installed_marker"
+                                fi
+
+                                packages[i]="$pkg_name"
+
+                                if [[ -n "$description" ]]; then
+                                    display_lines[i]="${display_lines[i]}\n  $description"
+                                fi
+
+                                ((i++))
+                                if [[ $i -gt $((limit + offset)) ]]; then
+                                    break
+                                fi
+                            fi
+                        done < <(apt-cache search "$package" 2>/dev/null | sort -u | head -100)
+                    fi
+                fi
+                ;;
+
+            # ... باقي مديري الحزم بنفس المنطق
+            "dnf")
+                # منطق مشابه لـ dnf
+                while IFS= read -r line; do
+                    if [[ $line =~ ^([^.]+)\.([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+(.*)$ ]]; then
+                        pkg_name="${BASH_REMATCH[1]}"
+                        repo="${BASH_REMATCH[2]}"
+                        version="${BASH_REMATCH[3]}"
+                        arch="${BASH_REMATCH[4]}"
+                        desc="${BASH_REMATCH[5]}"
+
+                        # فلترة ذكية لـ dnf
+                        if [[ $pkg_name =~ -devel$ || $pkg_name =~ -debug$ || $pkg_name =~ -doc$ ]] ||
+                           [[ $pkg_name =~ ^lib ]] && [[ ! $desc =~ [Gg]UI ]] && [[ ! $desc =~ [Aa]pplication ]] ||
+                           [[ $desc =~ [Dd]evelopment ]] && [[ $desc =~ [Ll]ibrary ]]; then
+                            continue
+                        fi
+
+                        # بحث ذكي بناءً على نوع البحث
+                        if [[ "$package" =~ [[:space:]] ]]; then
+                            # بحث بالمسافات
+                            if [[ ! $pkg_name =~ $package ]] && [[ ! $desc =~ $package ]]; then
+                                continue
+                            fi
+                        else
+                            # بحث بكلمة واحدة
+                            if [[ ! $pkg_name =~ ^$package ]] && [[ ! $pkg_name =~ ^$package- ]]; then
+                                continue
+                            fi
+                        fi
+
+                        local installed_marker=""
+                        if dnf list installed "$pkg_name" &>/dev/null; then
+                            installed_marker=" $(get_msg "installed")"
+                        fi
+
+                        display_lines[i]="$pkg_name.$repo $version $arch$installed_marker\n  $desc"
+                        packages[i]="$pkg_name"
+                        ((i++))
+                        if [[ $i -gt $((limit + offset)) ]]; then
+                            break
+                        fi
+                    fi
+                done < <(dnf search "$package" 2>/dev/null | head -100)
+                ;;
+
+            "pacman")
+                # منطق مشابه لـ pacman
+                while IFS= read -r line; do
+                    if [[ $line =~ ^([^/]+)/([^[:space:]]+)[[:space:]]+([^[:space:]]+)(.*)$ ]]; then
+                        pkg_name="${BASH_REMATCH[1]}"
+                        repo="${BASH_REMATCH[2]}"
+                        version="${BASH_REMATCH[3]}"
+                        extra="${BASH_REMATCH[4]}"
+
+                        # فلترة pacman
+                        if [[ $pkg_name =~ ^lib ]] && [[ $extra =~ [Ll]ibrary ]] &&
+                           [[ ! $extra =~ [Gg]raphic ]] && [[ ! $extra =~ [Mm]edia ]]; then
+                            continue
+                        fi
+
+                        # بحث ذكي
+                        if [[ "$package" =~ [[:space:]] ]]; then
+                            if [[ ! $pkg_name =~ $package ]] && [[ ! $extra =~ $package ]]; then
+                                continue
+                            fi
+                        else
+                            if [[ ! $pkg_name =~ ^$package ]] && [[ ! $pkg_name =~ ^$package- ]]; then
+                                continue
+                            fi
+                        fi
+
+                        local installed_marker=""
+                        if pacman -Q "$pkg_name" &>/dev/null; then
+                            installed_marker=" $(get_msg "installed")"
+                        fi
+
+                        display_lines[i]="$pkg_name/$repo $version$extra$installed_marker"
+                        packages[i]="$pkg_name"
+                        ((i++))
+                        if [[ $i -gt $((limit + offset)) ]]; then
+                            break
+                        fi
+                    fi
+                done < <(pacman -Ss "$package" 2>/dev/null | head -100)
+                ;;
+
+            *)
+                echo -e "${YELLOW}Program search not implemented for this package manager. Using general search...${NC}"
+                search_package "$package"
+                return
+                ;;
+        esac
+
+        # التحقق من النتائج
+        if [[ ${#packages[@]} -eq 0 ]]; then
+            echo -e "${YELLOW}No programs found for: $package${NC}"
+            echo -e "${BLUE}Try:${NC}"
+            echo -e "${BLUE}1. Using different search terms${NC}"
+            echo -e "${BLUE}2. Search in all packages (including libraries)${NC}"
+            return 1
+        fi
+
+        # عرض النتائج مع نظام التصفح
+        echo -e "${GREEN}$(get_msg "search_results"):${NC}"
+        echo "===================="
+
+        local total_results=${#packages[@]}
+        local start=$((offset + 1))
+        local end=$((offset + total_results))
+
+        echo -e "${CYAN}Showing results $start to $end${NC}"
+        echo
+
+        for ((idx=1; idx<=total_results; idx++)); do
+            if [[ -n "${display_lines[idx]}" ]]; then
+                echo -e "$((offset + idx)). ${display_lines[idx]}"
+                echo
+            fi
+        done
+
+        # خيارات التصفح الذكية
+        echo "0. $(get_msg "return_to_menu")"
+
+        local next_option_num=$((total_results + 1))
+        if [[ $total_results -eq $limit ]] && [[ $next_option_num -lt 99 ]]; then
+            echo "$next_option_num. 📄 عرض نتائج أكثر"
+        elif [[ $total_results -eq $limit ]]; then
+            echo "99. 📄 عرض نتائج أكثر"
+        fi
+
+        if [[ $offset -gt 0 ]]; then
+            local prev_option_num=$((total_results + 2))
+            if [[ $prev_option_num -lt 99 ]]; then
+                echo "$prev_option_num. ⬅️ العودة للنتائج السابقة"
+            else
+                echo "98. ⬅️ العودة للنتائج السابقة"
+            fi
+        fi
+
+        echo
+
+        # استلام الاختيار
+        local max_choice=$((offset + total_results))
+        read -p "$(get_msg "enter_number") (0 to $max_choice): " package_choice
+
+        case $package_choice in
+            0)
+                return
+                ;;
+            99|$next_option_num)
+                # عرض نتائج أكثر
+                offset=$((offset + limit))
+                continue
+                ;;
+            98|$prev_option_num)
+                # العودة للنتائج السابقة
+                offset=$((offset - limit))
+                if [[ $offset -lt 0 ]]; then
+                    offset=0
+                fi
+                continue
+                ;;
+            *)
+                # تثبيت الحزمة المختارة
+                if [[ $package_choice -ge 1 && $package_choice -le $max_choice ]]; then
+                    local real_choice=$((package_choice - offset))
+                    selected_package="${packages[$real_choice]}"
+
+                    echo -e "${YELLOW}$(get_msg "install_package_num") $package_choice: $selected_package? (y/N)${NC}"
+                    read -p "" confirm
+                    if [[ $confirm =~ ^[Yy]$ ]]; then
+                        install_package "$selected_package"
+                        return
+                    else
+                        echo -e "${YELLOW}Installation cancelled${NC}"
+                        continue
+                    fi
+                else
+                    echo -e "${RED}$(get_msg "invalid_option")${NC}"
+                    pause
+                    continue
+                fi
+                ;;
+        esac
+    done
+}
+
+# Enhanced search function for ALL packages
 search_package() {
     local package="$1"
     local pm=$(detect_package_manager)
@@ -395,44 +798,88 @@ search_package() {
         return 1
     fi
 
-    echo -e "${CYAN}$(get_msg "searching") $package...${NC}"
+    echo -e "${CYAN}$(get_msg "searching") $package ($(get_msg "libraries"))...${NC}"
 
-    # Create temporary file for search results
-    local temp_file=$(mktemp)
+    local packages=()
+    local display_lines=()
+    local i=1
 
     case $pm in
         "apt")
-            apt search "$package" 2>/dev/null | head -30 > "$temp_file"
+            # Search for all packages including libraries and dependencies
+            while IFS= read -r line; do
+                if [[ $line =~ ^([^/]+)/([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+([^[:space:]]+)(.*)$ ]]; then
+                    pkg_name="${BASH_REMATCH[1]}"
+                    repo="${BASH_REMATCH[2]}"
+                    version="${BASH_REMATCH[3]}"
+                    arch="${BASH_REMATCH[4]}"
+                    extra="${BASH_REMATCH[5]}"
+
+                    # Check if package is installed
+                    local installed_marker=""
+                    if dpkg-query -W "$pkg_name" &>/dev/null; then
+                        installed_marker=" $(get_msg "installed")"
+                    fi
+
+                    display_lines[i]="$pkg_name/$repo $version $arch$installed_marker"
+                    packages[i]="$pkg_name"
+
+                    # Read the description line
+                    if IFS= read -r desc_line && [[ $desc_line =~ ^[[:space:]] ]]; then
+                        display_lines[i]="${display_lines[i]}\n  ${desc_line## }"
+                    fi
+
+                    ((i++))
+                    if [[ $i -gt 15 ]]; then
+                        break
+                    fi
+                fi
+            done < <(apt search "$package" 2>/dev/null | grep -E "^([^/]+)/" | head -40)
             ;;
         "dnf")
-            dnf search "$package" 2>/dev/null | head -30 > "$temp_file"
-            ;;
-        "yum")
-            yum search "$package" 2>/dev/null | head -30 > "$temp_file"
+            while IFS= read -r line; do
+                if [[ $line =~ ^([^.]+)\.([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+(.*)$ ]]; then
+                    pkg_name="${BASH_REMATCH[1]}"
+                    repo="${BASH_REMATCH[2]}"
+                    version="${BASH_REMATCH[3]}"
+                    arch="${BASH_REMATCH[4]}"
+                    desc="${BASH_REMATCH[5]}"
+
+                    local installed_marker=""
+                    if dnf list installed "$pkg_name" &>/dev/null; then
+                        installed_marker=" $(get_msg "installed")"
+                    fi
+
+                    display_lines[i]="$pkg_name.$repo $version $arch$installed_marker\n  $desc"
+                    packages[i]="$pkg_name"
+                    ((i++))
+                    if [[ $i -gt 15 ]]; then
+                        break
+                    fi
+                fi
+            done < <(dnf search "$package" 2>/dev/null | head -30)
             ;;
         "pacman")
-            pacman -Ss "$package" 2>/dev/null | head -30 > "$temp_file"
-            ;;
-        "zypper")
-            zypper search "$package" 2>/dev/null | head -30 > "$temp_file"
-            ;;
-        "eopkg")
-            eopkg search "$package" 2>/dev/null | head -30 > "$temp_file"
-            ;;
-        "xbps")
-            xbps-query -Rs "$package" 2>/dev/null | head -30 > "$temp_file"
-            ;;
-        "emerge")
-            emerge --search "$package" 2>/dev/null | head -30 > "$temp_file"
-            ;;
-        "pkg")
-            pkg search "$package" 2>/dev/null | head -30 > "$temp_file"
-            ;;
-        "apk")
-            apk search "$package" 2>/dev/null | head -30 > "$temp_file"
-            ;;
-        "nix")
-            nix-env -qa "$package" 2>/dev/null | head -30 > "$temp_file"
+            while IFS= read -r line; do
+                if [[ $line =~ ^([^/]+)/([^[:space:]]+)[[:space:]]+([^[:space:]]+)(.*)$ ]]; then
+                    pkg_name="${BASH_REMATCH[1]}"
+                    repo="${BASH_REMATCH[2]}"
+                    version="${BASH_REMATCH[3]}"
+                    extra="${BASH_REMATCH[4]}"
+
+                    local installed_marker=""
+                    if pacman -Q "$pkg_name" &>/dev/null; then
+                        installed_marker=" $(get_msg "installed")"
+                    fi
+
+                    display_lines[i]="$pkg_name/$repo $version$extra$installed_marker"
+                    packages[i]="$pkg_name"
+                    ((i++))
+                    if [[ $i -gt 15 ]]; then
+                        break
+                    fi
+                fi
+            done < <(pacman -Ss "$package" 2>/dev/null | head -30)
             ;;
         *)
             echo -e "${RED}$(get_msg "error") $(get_msg "not_found")${NC}"
@@ -441,9 +888,8 @@ search_package() {
     esac
 
     # Check if search returned results
-    if [[ ! -s "$temp_file" ]]; then
+    if [[ ${#packages[@]} -eq 0 ]]; then
         echo -e "${YELLOW}No packages found for: $package${NC}"
-        rm -f "$temp_file"
         return 1
     fi
 
@@ -451,60 +897,19 @@ search_package() {
     echo -e "${GREEN}$(get_msg "search_results"):${NC}"
     echo "===================="
 
-    # Extract package names and store in array
-    local packages=()
-    local i=1
-
-    case $pm in
-        "apt")
-            while IFS= read -r line; do
-                if [[ $line =~ ^([^/]+)/ ]]; then
-                    pkg_name="${BASH_REMATCH[1]}"
-                    echo "$i. $line"
-                    packages[i]="$pkg_name"
-                    ((i++))
-                fi
-            done < "$temp_file"
-            ;;
-        "dnf"|"yum")
-            while IFS= read -r line; do
-                if [[ $line =~ ^([^.]+)\. ]]; then
-                    pkg_name="${BASH_REMATCH[1]}"
-                    echo "$i. $line"
-                    packages[i]="$pkg_name"
-                    ((i++))
-                fi
-            done < "$temp_file"
-            ;;
-        "pacman")
-            while IFS= read -r line; do
-                if [[ $line =~ ^([^/]+)/ ]]; then
-                    pkg_name="${BASH_REMATCH[1]}"
-                    echo "$i. $line"
-                    packages[i]="$pkg_name"
-                    ((i++))
-                fi
-            done < "$temp_file"
-            ;;
-        *)
-            # Generic fallback - show first 20 lines with numbers
-            i=1
-            while IFS= read -r line && [[ $i -le 20 ]]; do
-                echo "$i. $line"
-                packages[i]="$line"
-                ((i++))
-            done < "$temp_file"
-            ;;
-    esac
+    for ((idx=1; idx<${#display_lines[@]}; idx++)); do
+        if [[ -n "${display_lines[idx]}" ]]; then
+            echo -e "$idx. ${display_lines[idx]}"
+        fi
+    done
 
     echo "0. $(get_msg "return_to_menu")"
     echo
 
     # Ask user if they want to install from results
-    read -p "$(get_msg "enter_number") (0 to $(($i-1))): " package_choice
+    read -p "$(get_msg "enter_number") (0 to $((${#packages[@]} - 1))): " package_choice
 
     if [[ $package_choice -eq 0 ]]; then
-        rm -f "$temp_file"
         return
     fi
 
@@ -521,11 +926,9 @@ search_package() {
     else
         echo -e "${RED}$(get_msg "invalid_option")${NC}"
     fi
-
-    rm -f "$temp_file"
 }
 
-# Enhanced Flatpak search function with interactive installation
+# Enhanced Flatpak search function with interactive installation - FIXED VERSION
 search_flatpak() {
     local package="$1"
 
@@ -536,60 +939,164 @@ search_flatpak() {
 
     echo -e "${CYAN}$(get_msg "searching") $package...${NC}"
 
-    # Create temporary file for search results
-    local temp_file=$(mktemp)
-    flatpak search "$package" 2>/dev/null | head -30 > "$temp_file"
+    local packages=()
+    local display_lines=()
+    local i=1
 
-    # Check if search returned results
-    if [[ ! -s "$temp_file" ]]; then
+    # استخدام flatpak search مع output أكثر دقة
+    while IFS= read -r line; do
+        # تنسيق flatpak search النموذجي: "Application ID    Version    Branch    Description"
+        if [[ $line =~ ^([^\t]+)\t+([^\t]+)\t+([^\t]+)\t+(.*)$ ]]; then
+            app_id="${BASH_REMATCH[1]}"
+            version="${BASH_REMATCH[2]}"
+            branch="${BASH_REMATCH[3]}"
+            description="${BASH_REMATCH[4]}"
+
+            # تنظيف الحقول
+            app_id=$(echo "$app_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+            description=$(echo "$description" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+            if [[ -n "$app_id" ]]; then
+                # تخطى الـ plugins والـ runtimes، ركز على التطبيقات الرئيسية
+                if [[ $app_id =~ \.Plugin\. ]] || [[ $app_id =~ ^runtime/ ]] ||
+                   [[ $description =~ [Pp]lugin ]] || [[ $app_id =~ /[Ss]dk$ ]]; then
+                    continue
+                fi
+
+                # التحقق إذا كانت الحزمة مثبتة
+                local installed_marker=""
+                if flatpak list --app | grep -q "$app_id"; then
+                    installed_marker=" $(get_msg "installed")"
+                fi
+
+                # استخراج اسم التطبيق من الـ Application ID
+                app_name=$(echo "$app_id" | awk -F '.' '{print $NF}' | sed 's/^\(.\)/\u\1/')
+
+                display_lines[i]="$app_name - $description$installed_marker\n  ID: $app_id"
+                packages[i]="$app_id"
+                ((i++))
+                if [[ $i -gt 15 ]]; then
+                    break
+                fi
+            fi
+        fi
+    done < <(flatpak search "$package" 2>/dev/null | head -30)
+
+    # إذا لم توجد نتائج، جرب البحث بدون فلترة مسبقة
+    if [[ ${#packages[@]} -eq 0 ]]; then
+        echo -e "${YELLOW}No main applications found, showing all results...${NC}"
+
+        while IFS= read -r line; do
+            if [[ $line =~ ^([^\t]+)\t+([^\t]+)\t+([^\t]+)\t+(.*)$ ]]; then
+                app_id="${BASH_REMATCH[1]}"
+                version="${BASH_REMATCH[2]}"
+                branch="${BASH_REMATCH[3]}"
+                description="${BASH_REMATCH[4]}"
+
+                app_id=$(echo "$app_id" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+                description=$(echo "$description" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+                if [[ -n "$app_id" ]]; then
+                    local installed_marker=""
+                    if flatpak list --app | grep -q "$app_id"; then
+                        installed_marker=" $(get_msg "installed")"
+                    fi
+
+                    app_name=$(echo "$app_id" | awk -F '.' '{print $NF}' | sed 's/^\(.\)/\u\1/')
+
+                    # تمييز الـ plugins والـ runtimes
+                    type_marker=""
+                    if [[ $app_id =~ \.Plugin\. ]]; then
+                        type_marker=" [Plugin]"
+                    elif [[ $app_id =~ ^runtime/ ]]; then
+                        type_marker=" [Runtime]"
+                    fi
+
+                    display_lines[i]="$app_name - $description$type_marker$installed_marker\n  ID: $app_id"
+                    packages[i]="$app_id"
+                    ((i++))
+                    if [[ $i -gt 15 ]]; then
+                        break
+                    fi
+                fi
+            fi
+        done < <(flatpak search "$package" 2>/dev/null | head -20)
+    fi
+
+    # إذا لم توجد نتائج نهائياً، جرب طريقة بديلة
+    if [[ ${#packages[@]} -eq 0 ]]; then
+        echo -e "${YELLOW}Trying alternative search method...${NC}"
+
+        # استخدام flatpak remote-ls للبحث في مستودع flathub
+        while IFS= read -r app_id; do
+            if [[ -n "$app_id" && $app_id =~ $package ]]; then
+                # الحصول على معلومات التطبيق
+                app_info=$(flatpak info "$app_id" 2>/dev/null | head -10)
+                if [[ $? -eq 0 ]]; then
+                    app_name=$(echo "$app_id" | awk -F '.' '{print $NF}' | sed 's/^\(.\)/\u\1/')
+                    description=$(echo "$app_info" | grep -i "description:" | cut -d':' -f2- | sed 's/^[[:space:]]*//')
+
+                    local installed_marker=""
+                    if flatpak list --app | grep -q "$app_id"; then
+                        installed_marker=" $(get_msg "installed")"
+                    fi
+
+                    if [[ -z "$description" ]]; then
+                        description="Multimedia application"
+                    fi
+
+                    display_lines[i]="$app_name - $description$installed_marker\n  ID: $app_id"
+                    packages[i]="$app_id"
+                    ((i++))
+                    if [[ $i -gt 10 ]]; then
+                        break
+                    fi
+                fi
+            fi
+        done < <(flatpak remote-ls flathub --app 2>/dev/null | grep -i "$package" | head -15)
+    fi
+
+    # التحقق إذا كان البحث عاد بنتائج
+    if [[ ${#packages[@]} -eq 0 ]]; then
         echo -e "${YELLOW}No Flatpak packages found for: $package${NC}"
-        rm -f "$temp_file"
+        echo -e "${BLUE}Try installing directly with: flatpak install flathub <package-name>${NC}"
         return 1
     fi
 
-    # Display search results with numbers
+    # عرض نتائج البحث مع الأرقام
     echo -e "${GREEN}$(get_msg "search_results"):${NC}"
     echo "===================="
 
-    # Extract package names and store in array
-    local packages=()
-    local i=1
-
-    while IFS= read -r line; do
-        if [[ $line =~ ^([^/]+)/ ]]; then
-            pkg_name="${BASH_REMATCH[1]}"
-            echo "$i. $line"
-            packages[i]="$pkg_name"
-            ((i++))
+    for ((idx=1; idx<${#display_lines[@]}; idx++)); do
+        if [[ -n "${display_lines[idx]}" ]]; then
+            echo -e "$idx. ${display_lines[idx]}"
         fi
-    done < "$temp_file"
+    done
 
     echo "0. $(get_msg "return_to_menu")"
     echo
 
-    # Ask user if they want to install from results
-    read -p "$(get_msg "enter_number") (0 to $(($i-1))): " package_choice
+    # سؤال المستخدم إذا كان يريد التثبيت من النتائج
+    read -p "$(get_msg "enter_number") (0 to $((${#packages[@]} - 1))): " package_choice
 
     if [[ $package_choice -eq 0 ]]; then
-        rm -f "$temp_file"
         return
     fi
 
-    # Install selected package
+    # تثبيت الحزمة المختارة
     if [[ -n "${packages[$package_choice]}" ]]; then
         selected_package="${packages[$package_choice]}"
         echo -e "${YELLOW}$(get_msg "install_package_num") $package_choice: $selected_package? (y/N)${NC}"
         read -p "" confirm
         if [[ $confirm =~ ^[Yy]$ ]]; then
-            flatpak install -y flathub "$selected_package"
+            echo -e "${GREEN}Installing $selected_package...${NC}"
+            flatpak install -y flathub "$selected_package" --noninteractive
         else
             echo -e "${YELLOW}Installation cancelled${NC}"
         fi
     else
         echo -e "${RED}$(get_msg "invalid_option")${NC}"
     fi
-
-    rm -f "$temp_file"
 }
 
 # Enhanced Snap search function with interactive installation
@@ -603,14 +1110,37 @@ search_snap() {
 
     echo -e "${CYAN}$(get_msg "searching") $package...${NC}"
 
-    # Create temporary file for search results
-    local temp_file=$(mktemp)
-    snap find "$package" 2>/dev/null | head -30 > "$temp_file"
+    local packages=()
+    local display_lines=()
+    local i=1
+
+    # Parse snap search results (skip header line)
+    while IFS= read -r line; do
+        if [[ $line =~ ^([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+([^[:space:]]+)[[:space:]]+([^[:space:]]+)(.*)$ ]]; then
+            pkg_name="${BASH_REMATCH[1]}"
+            version="${BASH_REMATCH[2]}"
+            developer="${BASH_REMATCH[3]}"
+            notes="${BASH_REMATCH[4]}"
+            desc="${BASH_REMATCH[5]}"
+
+            # Check if package is installed
+            local installed_marker=""
+            if snap list | grep -q "^$pkg_name "; then
+                installed_marker=" $(get_msg "installed")"
+            fi
+
+            display_lines[i]="$pkg_name $version $developer $notes$installed_marker\n  $desc"
+            packages[i]="$pkg_name"
+            ((i++))
+            if [[ $i -gt 15 ]]; then
+                break
+            fi
+        fi
+    done < <(snap find "$package" 2>/dev/null | tail -n +2 | head -20)
 
     # Check if search returned results
-    if [[ ! -s "$temp_file" ]]; then
+    if [[ ${#packages[@]} -eq 0 ]]; then
         echo -e "${YELLOW}No Snap packages found for: $package${NC}"
-        rm -f "$temp_file"
         return 1
     fi
 
@@ -618,33 +1148,19 @@ search_snap() {
     echo -e "${GREEN}$(get_msg "search_results"):${NC}"
     echo "===================="
 
-    # Extract package names and store in array
-    local packages=()
-    local i=1
-
-    # Skip header line and process results
-    while IFS= read -r line; do
-        if [[ $i -eq 1 ]]; then
-            # Skip header
-            ((i++))
-            continue
+    for ((idx=1; idx<${#display_lines[@]}; idx++)); do
+        if [[ -n "${display_lines[idx]}" ]]; then
+            echo -e "$idx. ${display_lines[idx]}"
         fi
-        if [[ $line =~ ^([^[:space:]]+) ]]; then
-            pkg_name="${BASH_REMATCH[1]}"
-            echo "$i. $line"
-            packages[i]="$pkg_name"
-            ((i++))
-        fi
-    done < "$temp_file"
+    done
 
     echo "0. $(get_msg "return_to_menu")"
     echo
 
     # Ask user if they want to install from results
-    read -p "$(get_msg "enter_number") (0 to $(($i-1))): " package_choice
+    read -p "$(get_msg "enter_number") (0 to $((${#packages[@]} - 1))): " package_choice
 
     if [[ $package_choice -eq 0 ]]; then
-        rm -f "$temp_file"
         return
     fi
 
@@ -661,8 +1177,215 @@ search_snap() {
     else
         echo -e "${RED}$(get_msg "invalid_option")${NC}"
     fi
+}
 
-    rm -f "$temp_file"
+# Enhanced package installation with search option
+install_package() {
+    local package="$1"
+    local pm=$(detect_package_manager)
+
+    if [[ -z "$package" ]]; then
+        echo -e "${CYAN}$(get_msg "install") - $(get_msg "search_first")${NC}"
+        echo "1. $(get_msg "manual_entry")"
+        echo "2. $(get_msg "search_programs")"
+        echo "3. $(get_msg "search_packages")"
+        echo "0. $(get_msg "back")"
+        echo
+
+        read -p "$(get_msg "enter_choice") " choice
+
+        case $choice in
+            1)
+                echo
+                read -p "$(get_msg "enter_package") " package
+                ;;
+            2)
+                echo
+                read -p "$(get_msg "enter_package") " search_term
+                if [[ -n "$search_term" ]]; then
+                    search_programs "$search_term"
+                fi
+                return
+                ;;
+            3)
+                echo
+                read -p "$(get_msg "enter_package") " search_term
+                if [[ -n "$search_term" ]]; then
+                    search_package "$search_term"
+                fi
+                return
+                ;;
+            0)
+                return
+                ;;
+            *)
+                echo -e "${RED}$(get_msg "invalid_option")${NC}"
+                return 1
+                ;;
+        esac
+    fi
+
+    if [[ -z "$package" ]]; then
+        echo -e "${RED}$(get_msg "error") $(get_msg "no_package")${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}$(get_msg "installing") $package...${NC}"
+
+    case $pm in
+        "apt")
+            sudo apt update && sudo apt install -y "$package"
+            ;;
+        "dnf")
+            sudo dnf install -y "$package"
+            ;;
+        "yum")
+            sudo yum install -y "$package"
+            ;;
+        "pacman")
+            sudo pacman -S --noconfirm "$package"
+            ;;
+        "zypper")
+            sudo zypper install -y "$package"
+            ;;
+        "eopkg")
+            sudo eopkg install "$package"
+            ;;
+        "xbps")
+            sudo xbps-install -S "$package"
+            ;;
+        "emerge")
+            sudo emerge "$package"
+            ;;
+        "pkg")
+            sudo pkg install "$package"
+            ;;
+        "apk")
+            sudo apk add "$package"
+            ;;
+        "nix")
+            nix-env -i "$package"
+            ;;
+        *)
+            echo -e "${RED}$(get_msg "error") $(get_msg "not_found")${NC}"
+            return 1
+            ;;
+    esac
+}
+
+# Enhanced Flatpak installation with search option - FIXED VERSION
+install_flatpak_package() {
+    local package="$1"
+
+    if [[ -z "$package" ]]; then
+        echo -e "${CYAN}$(get_msg "install_flatpak") - $(get_msg "search_first")${NC}"
+        echo "1. $(get_msg "manual_entry")"
+        echo "2. $(get_msg "search_flatpak")"
+        echo "0. $(get_msg "back")"
+        echo
+
+        read -p "$(get_msg "enter_choice") " choice
+
+        case $choice in
+            1)
+                echo
+                read -p "$(get_msg "enter_package") " package
+                ;;
+            2)
+                echo
+                read -p "$(get_msg "enter_package") " search_term
+                if [[ -n "$search_term" ]]; then
+                    search_flatpak "$search_term"
+                fi
+                return
+                ;;
+            0)
+                return
+                ;;
+            *)
+                echo -e "${RED}$(get_msg "invalid_option")${NC}"
+                return 1
+                ;;
+        esac
+    fi
+
+    if [[ -z "$package" ]]; then
+        echo -e "${RED}$(get_msg "error") $(get_msg "no_package")${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}$(get_msg "installing") $package...${NC}"
+
+    # محاولة التثبيت المباشر أولاً
+    if flatpak install -y flathub "$package" --noninteractive 2>/dev/null; then
+        echo -e "${GREEN}Successfully installed $package${NC}"
+    else
+        echo -e "${YELLOW}Direct installation failed, trying with app prefix...${NC}"
+        # إذا فشل، جرب مع بادئة التطبيق
+        if [[ ! $package =~ ^app/ ]] && [[ ! $package =~ \. ]]; then
+            # إذا كان اسم بسيط مثل "vlc"، حاول تحويله إلى Application ID
+            if flatpak install -y flathub "app/$package" --noninteractive 2>/dev/null; then
+                echo -e "${GREEN}Successfully installed app/$package${NC}"
+            else
+                echo -e "${YELLOW}Trying with common application ID pattern...${NC}"
+                # جرب نمط Application ID شائع
+                if flatpak install -y flathub "org.${package}.${package}" --noninteractive 2>/dev/null; then
+                    echo -e "${GREEN}Successfully installed org.${package}.${package}${NC}"
+                else
+                    echo -e "${RED}Failed to install $package${NC}"
+                    echo -e "${YELLOW}Please use search to find the correct application ID${NC}"
+                fi
+            fi
+        else
+            echo -e "${RED}Failed to install $package${NC}"
+            echo -e "${YELLOW}Please use search to find the correct application ID${NC}"
+        fi
+    fi
+}
+
+# Enhanced Snap installation with search option
+install_snap_package() {
+    local package="$1"
+
+    if [[ -z "$package" ]]; then
+        echo -e "${CYAN}$(get_msg "install_snap") - $(get_msg "search_first")${NC}"
+        echo "1. $(get_msg "manual_entry")"
+        echo "2. $(get_msg "search_snap")"
+        echo "0. $(get_msg "back")"
+        echo
+
+        read -p "$(get_msg "enter_choice") " choice
+
+        case $choice in
+            1)
+                echo
+                read -p "$(get_msg "enter_package") " package
+                ;;
+            2)
+                echo
+                read -p "$(get_msg "enter_package") " search_term
+                if [[ -n "$search_term" ]]; then
+                    search_snap "$search_term"
+                fi
+                return
+                ;;
+            0)
+                return
+                ;;
+            *)
+                echo -e "${RED}$(get_msg "invalid_option")${NC}"
+                return 1
+                ;;
+        esac
+    fi
+
+    if [[ -z "$package" ]]; then
+        echo -e "${RED}$(get_msg "error") $(get_msg "no_package")${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}$(get_msg "installing") $package...${NC}"
+    sudo snap install "$package"
 }
 
 # Smart removal functions
@@ -1088,59 +1811,7 @@ smart_remove_nodejs() {
     esac
 }
 
-# Package management functions
-install_package() {
-    local package="$1"
-    local pm=$(detect_package_manager)
-
-    if [[ -z "$package" ]]; then
-        echo -e "${RED}$(get_msg "error") $(get_msg "no_package")${NC}"
-        return 1
-    fi
-
-    echo -e "${GREEN}$(get_msg "installing") $package...${NC}"
-
-    case $pm in
-        "apt")
-            sudo apt update && sudo apt install -y "$package"
-            ;;
-        "dnf")
-            sudo dnf install -y "$package"
-            ;;
-        "yum")
-            sudo yum install -y "$package"
-            ;;
-        "pacman")
-            sudo pacman -S --noconfirm "$package"
-            ;;
-        "zypper")
-            sudo zypper install -y "$package"
-            ;;
-        "eopkg")
-            sudo eopkg install "$package"
-            ;;
-        "xbps")
-            sudo xbps-install -S "$package"
-            ;;
-        "emerge")
-            sudo emerge "$package"
-            ;;
-        "pkg")
-            sudo pkg install "$package"
-            ;;
-        "apk")
-            sudo apk add "$package"
-            ;;
-        "nix")
-            nix-env -i "$package"
-            ;;
-        *)
-            echo -e "${RED}$(get_msg "error") $(get_msg "not_found")${NC}"
-            return 1
-            ;;
-    esac
-}
-
+# Package removal function
 remove_package() {
     local package="$1"
     local pm=$(detect_package_manager)
@@ -1835,14 +2506,15 @@ package_manager_menu() {
         echo "1. $(get_msg "install")"
         echo "2. $(get_msg "remove")"
         echo "3. $(get_msg "smart_remove")"
-        echo "4. $(get_msg "search")"
-        echo "5. $(get_msg "update")"
-        echo "6. $(get_msg "upgrade")"
-        echo "7. $(get_msg "list")"
-        echo "8. $(get_msg "info")"
-        echo "9. $(get_msg "fix")"
-        echo "10. $(get_msg "clean")"
-        echo "11. $(get_msg "autoremove")"
+        echo "4. $(get_msg "search_programs")"
+        echo "5. $(get_msg "search_packages")"
+        echo "6. $(get_msg "update")"
+        echo "7. $(get_msg "upgrade")"
+        echo "8. $(get_msg "list")"
+        echo "9. $(get_msg "info")"
+        echo "10. $(get_msg "fix")"
+        echo "11. $(get_msg "clean")"
+        echo "12. $(get_msg "autoremove")"
         echo "0. $(get_msg "back")"
         echo
 
@@ -1851,8 +2523,7 @@ package_manager_menu() {
         case $choice in
             1)
                 echo
-                read -p "$(get_msg "enter_package") " package
-                install_package "$package"
+                install_package
                 pause
                 ;;
             2)
@@ -1867,31 +2538,37 @@ package_manager_menu() {
             4)
                 echo
                 read -p "$(get_msg "enter_package") " package
+                search_programs "$package"
+                pause
+                ;;
+            5)
+                echo
+                read -p "$(get_msg "enter_package") " package
                 search_package "$package"
                 pause
                 ;;
-            5|6)
+            6|7)
                 echo
                 update_packages
                 pause
                 ;;
-            7)
+            8)
                 echo
                 list_packages
                 pause
                 ;;
-            8)
+            9)
                 echo
                 read -p "$(get_msg "enter_package") " package
                 package_info "$package"
                 pause
                 ;;
-            9)
+            10)
                 echo
                 fix_packages
                 pause
                 ;;
-            10|11)
+            11|12)
                 echo
                 clean_cache
                 pause
@@ -1920,7 +2597,7 @@ flatpak_menu() {
         echo "5. $(get_msg "update_flatpak")"
         echo "6. $(get_msg "list_flatpak")"
         echo "7. $(get_msg "add_flatpak_repo")"
-        echo "8. Refresh Flathub Repository"
+        echo "8. $(get_msg "refresh_flathub")"
         echo "0. $(get_msg "back")"
         echo
 
@@ -1929,10 +2606,7 @@ flatpak_menu() {
         case $choice in
             1)
                 echo
-                read -p "$(get_msg "enter_package") " package
-                if [[ -n "$package" ]]; then
-                    flatpak install -y flathub "$package"
-                fi
+                install_flatpak_package
                 pause
                 ;;
             2)
@@ -2009,10 +2683,7 @@ snap_menu() {
         case $choice in
             1)
                 echo
-                read -p "$(get_msg "enter_package") " package
-                if [[ -n "$package" ]]; then
-                    sudo snap install "$package"
-                fi
+                install_snap_package
                 pause
                 ;;
             2)
