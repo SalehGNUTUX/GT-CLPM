@@ -1,40 +1,45 @@
 # GT-CLPM - GNUTUX Command Line Package Manager
 
 ![GT-CLPM](https://img.shields.io/badge/GT--CLPM-Package_Manager-blue)
-![Version](https://img.shields.io/badge/Version-1.1-green)
+![Version](https://img.shields.io/badge/Version-1.2.2-green)
 ![License](https://img.shields.io/badge/License-GPLv2-orange)
 ![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey)
 
 <img width="256" height="256" alt="GT-CLPM Logo" src="https://github.com/user-attachments/assets/6805474c-a20d-4ba4-b066-cf83536dbf31" />
 
 مدير حزم سطر الأوامر الشامل لأنظمة جنو/لينكس  
-**الإصدار:** 1.1  
+**الإصدار:** 1.2.2  
 **المطور:** GNUTUX  
 **الرخصة:** GPLv2
 
 ---
 
-## 🆕 ما الجديد في الإصدار 1.1
+## 🆕 ما الجديد في الإصدار 1.2.2
 
 ### ✨ الميزات الجديدة
-- 🧠 **الإزالة الذكية** - تصفح الحزم المثبتة وإزالتها بسهولة
-- 🔢 **التثبيت من نتائج البحث** - اختر الحزمة من قائمة البحث المرقمة
-- 🛠️ **أدوات تثبيت إضافية** - دعم مديري حزم اللغات البرمجية
-- 🐍 **مدير حزم بايثون** - تثبيت وإزالة حزم Python بطرق آمنة
-- 📦 **مدير حزم Node.js** - إدارة حزم npm/yarn/pnpm
-- 🎯 **واجهة محسنة** - رموز تعبيرية وإخراج أكثر تنظيماً
+- 🔍 **بحث فلاتباك مُصلَح** - نتائج صحيحة وكاملة بما فيها `org.telegram.desktop` وما شابهه
+- 📄 **تنقل بين صفحات النتائج** - استخدم `n` للصفحة التالية و`p` للسابقة
+- 🔢 **50 نتيجة** بدلاً من 20 لكل عملية بحث
+- 🛠️ **جميع قوائم أدوات اللغات مكتملة** - Ruby, Rust, Go, Java, PHP, Haskell, Scientific
+- ➕ **إدارة المستودعات** - PPA, COPR, AUR helper, Packman, RPM Fusion
+- 🍺 **دعم Homebrew** على Linux/macOS
+- 🔬 **أدوات علمية** - Spack, Conda/Miniconda, Mamba
+- 🐍 **Python محسّن** - pip --user, pipx, venv مع إدارة كاملة
+- 🐹 **Go** - تثبيت تلقائي إذا لم يكن موجوداً
 
-### 📊 مقارنة بين الإصدارين
+### 📊 مقارنة الإصدارات
 
-| الميزة | v1.0 | v1.1 |
-|--------|------|------|
-| الإزالة الذكية | ❌ | ✅ |
-| التثبيت من نتائج البحث | ❌ | ✅ |
-| أدوات بايثون (pip/pipx) | ❌ | ✅ |
-| أدوات Node.js (npm/yarn) | ❌ | ✅ |
-| واجهة مترابطة مع رموز | أساسية | 🎨 محسنة |
-| البحث التفاعلي | أساسي | 🔢 تفاعلي |
-| إدارة البيئات الافتراضية | ❌ | ✅ |
+| الميزة | v1.0 | v1.1 | v1.2.2 |
+|--------|------|------|--------|
+| الإزالة الذكية | ❌ | ✅ | ✅ |
+| التثبيت من نتائج البحث | ❌ | ✅ | ✅ |
+| بحث فلاتباك صحيح | ❌ | ⚠️ | ✅ |
+| تنقل بين صفحات النتائج | ❌ | ❌ | ✅ |
+| أدوات اللغات (pip/pipx/gem/cargo...) | ❌ | ⚠️ جزئي | ✅ كامل |
+| إدارة المستودعات | ❌ | ❌ | ✅ |
+| Spack / Conda / Mamba | ❌ | ❌ | ✅ |
+| Homebrew | ❌ | ❌ | ✅ |
+| حد نتائج البحث | - | 20 | 50 |
 
 ---
 
@@ -45,43 +50,45 @@ GT-CLPM هو مدير حزم سطر أوامر شامل لأنظمة جنو/لي
 
 ### ✨ المميزات الرئيسية
 - 🌐 دعم لغات متعددة (العربية والإنجليزية)
-- 📦 دعم 12+ مدير حزم مختلف
-- 📱 دعم فلاتباك وسناب
+- 📦 دعم 13+ مدير حزم مختلف
+- 📱 دعم فلاتباك وسناب مع بحث تفاعلي مُصلَح
+- 📄 تصفح نتائج البحث بالصفحات (n/p)
 - ⚙️ أدوات صيانة النظام والنسخ الاحتياطي
 - 🎨 واجهة ملونة وسهلة الاستخدام
 - 🔧 إصلاح الحزم المعطلة تلقائياً
 - 🧠 إزالة ذكية للحزم
-- 🔢 تثبيت تفاعلي من نتائج البحث
-- 🐍 دعم مديري حزم اللغات البرمجية
+- 🛠️ إدارة المستودعات والـ PPA
+- 🐍 دعم كامل لمديري حزم اللغات البرمجية
 
 ### 📋 مديرو الحزم المدعومون
-- **APT** (Debian, Ubuntu)
-- **DNF/YUM** (Fedora, RHEL)
-- **Pacman** (Arch, Manjaro)
+- **APT** (Debian, Ubuntu, Mint)
+- **DNF/YUM** (Fedora, RHEL, CentOS)
+- **Pacman** (Arch, Manjaro, EndeavourOS)
 - **Zypper** (openSUSE)
 - **Eopkg** (Solus)
 - **XBPS** (Void Linux)
 - **Emerge** (Gentoo)
 - **PKG** (FreeBSD)
-- **APK** (Alpine)
+- **APK** (Alpine Linux)
 - **Nix** (NixOS)
+- **Homebrew** (Linux/macOS)
 - **Flatpak** (التطبيقات العالمية)
 - **Snap** (حزم كانونيكال)
 
 ### 🛠️ مديرو حزم اللغات البرمجية
-- **🐍 Python** - pip, pipx, virtual environments
+- **🐍 Python** - pip, pip --user, pipx, virtual environments
 - **📦 Node.js** - npm, yarn, pnpm, npx
-- **💎 Ruby** - gem
-- **🦀 Rust** - cargo
-- **🐹 Go** - go install
-- **☕ Java** - maven, gradle
-- **🐘 PHP** - composer
-- **🧊 Haskell** - cabal, stack
-- **🔬 Scientific** - Spack
+- **💎 Ruby** - gem, bundler
+- **🦀 Rust** - cargo, rustup
+- **🐹 Go** - go install (تثبيت تلقائي)
+- **☕ Java** - maven, gradle, SDKMAN
+- **🐘 PHP** - composer, إضافات PHP
+- **🧊 Haskell** - cabal, stack, ghcup
+- **🔬 Scientific** - Spack, Conda/Miniconda, Mamba
 
 ### 🛠️ التثبيت
 
-#### التثبيت السريع (مستودع جيتهاب):
+#### التثبيت السريع:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
 ```
@@ -110,71 +117,39 @@ curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.
 ```bash
 sudo rm -f /usr/local/bin/gt-clpm
 rm -f ~/.gt-clpm-lang
-rm -f ~/.gt-clpm-backup-*.txt
+rm -f ~/gt-clpm-backup-*.txt
 ```
 
 ### 🎯 طريقة الاستخدام
-بعد التثبيت، شغّل البرنامج بالأمر:
 ```bash
 gt-clpm
 ```
 
-### 🧠 الميزات الجديدة في v1.1
-
-#### الإزالة الذكية
-```bash
-# تصفح جميع الحزم المثبتة وإزالة ما تريد
-gt-clpm → مدير الحزم → إزالة ذكية
+### 📄 التنقل في نتائج البحث (جديد في v1.2.2)
 ```
+Search Results (47) — Page 1/5:
+════════════════════════════════════════
+1. Telegram Desktop [flathub/stable]
+   ...
+10. ...
 
-#### البحث التفاعلي
-```bash
-# ابحث عن حزمة وثبتها مباشرة من القائمة
-gt-clpm → مدير الحزم → بحث → اختر رقم الحزمة
+  n → Next page (results 11-20)
+  0 → Return to menu
+
+Enter package number (1-47, n/p/0): n   ← للصفحة التالية
 ```
-
-#### إدارة حزم بايثون
-```bash
-gt-clpm → طرق تثبيت أخرى → بايثون
-# الخيارات المتاحة:
-# 1. تثبيت بـ pipx (موصى به)
-# 2. تثبيت في بيئة افتراضية  
-# 3. إزالة حزم بايثون
-# 4. عرض الحزم المثبتة
-```
-
-#### إدارة حزم Node.js
-```bash
-gt-clpm → طرق تثبيت أخرى → Node.js
-# الخيارات المتاحة:
-# 1. تثبيت حزمة بشكل عام
-# 2. تثبيت حزمة بشكل محلي
-# 3. تشغيل حزمة بـ npx
-# 4. إزالة حزمة Node.js
-```
-
-### 📸 لقطات الشاشة
-
-<img width="1440" height="900" alt="واجهة البرنامج" src="https://github.com/user-attachments/assets/91287643-8f19-4af6-a78e-23cfea894b68" />
-
-*القائمة الرئيسية المحسنة برموز تعبيرية*
-
-<img width="1440" height="900" alt="البحث التفاعلي" src="https://github.com/user-attachments/assets/sample-search" />
-
-*البحث التفاعلي مع الترقيم - ميزة جديدة في v1.1*
 
 ### 📁 الهيكل التنظيمي
 ```
 GT-CLPM/
-├── install.sh          # مثبت سريع
-├── uninstall.sh        # مزيل سريع
-├── gt-clpm-v1.1.sh     # النسخة الرئيسية v1.1
-├── gt-clpm-v1.0.sh     # النسخة السابقة v1.0
-└── README.md           # هذا الملف
+├── install.sh        # مثبت سريع
+├── uninstall.sh      # مزيل سريع
+├── GT-CLPM/
+│   └── gt-clpm.sh    # البرنامج الرئيسي (يُحدَّث في مكانه)
+└── README.md         # هذا الملف
 ```
 
 ### 🐛 الإبلاغ عن المشكلات
-لتبليغ عن الأخطاء أو اقتراح ميزات جديدة:  
 [📝 إنشاء إشكالية على GitHub](https://github.com/SalehGNUTUX/GT-CLPM/issues)
 
 ---
@@ -182,57 +157,60 @@ GT-CLPM/
 ## 🇬🇧 English
 
 ### 🚀 Overview
-GT-CLPM is a comprehensive command-line package manager for GNU/Linux systems. It provides a unified terminal interface for managing packages across multiple package managers.
+GT-CLPM is a comprehensive command-line package manager for GNU/Linux systems. It provides a unified terminal interface for managing packages across 13+ package managers, with full support for language-specific package tools and universal formats like Flatpak and Snap.
 
 ### ✨ Key Features
 - 🌐 Multi-language support (Arabic & English)
-- 📦 Support for 12+ package managers
-- 📱 Flatpak and Snap integration
-- ⚙️ System maintenance and backup tools
-- 🎨 Colorful and user-friendly interface
+- 📦 Support for 13+ system package managers
+- 📱 Fixed Flatpak & Snap search with interactive selection
+- 📄 Paginated search results (n/p navigation)
+- ⚙️ System maintenance and backup/restore tools
+- 🎨 Colorful and user-friendly terminal interface
 - 🔧 Automatic broken package repair
-- 🧠 Smart package removal
-- 🔢 Interactive installation from search results
-- 🐍 Programming language package managers
+- 🧠 Smart package removal (browse & select)
+- ➕ Repository/PPA management per distro
+- 🐍 Full programming language package manager support
 
-### 🆕 What's New in Version 1.1
+### 🆕 What's New in v1.2.2
 
-#### New Features
-- 🧠 **Smart Remove** - Browse and remove installed packages easily
-- 🔢 **Install from Search Results** - Select packages from numbered search lists
-- 🛠️ **Additional Installers** - Support for programming language package managers
-- 🐍 **Python Tools** - Install/remove Python packages safely
-- 📦 **Node.js Tools** - Manage npm/yarn/pnpm packages
-- 🎯 **Enhanced Interface** - Emojis and better organized output
+- 🔍 **Fixed Flatpak search** — correct results including `org.telegram.desktop` and similar
+- 📄 **Paginated results** — `n` next page, `p` previous page, up to 50 results loaded
+- 🛠️ **All language tool menus fully implemented** — Ruby, Rust, Go, Java, PHP, Haskell, Scientific
+- ➕ **Repository management** — PPA (APT), COPR (DNF), AUR helper (Pacman), Packman (Zypper)
+- 🍺 **Homebrew support** added
+- 🔬 **Scientific tools** — Spack, Conda/Miniconda, Mamba with environment management
+- 🐍 **Enhanced Python tools** — pip --user, pipx, named venvs
+- 🐹 **Go auto-install** if not present
 
-### 📋 Supported Package Managers
-- **APT** (Debian, Ubuntu)
-- **DNF/YUM** (Fedora, RHEL)
-- **Pacman** (Arch, Manjaro)
+### 📋 Supported System Package Managers
+- **APT** (Debian, Ubuntu, Mint)
+- **DNF/YUM** (Fedora, RHEL, CentOS)
+- **Pacman** (Arch, Manjaro, EndeavourOS)
 - **Zypper** (openSUSE)
 - **Eopkg** (Solus)
 - **XBPS** (Void Linux)
 - **Emerge** (Gentoo)
 - **PKG** (FreeBSD)
-- **APK** (Alpine)
+- **APK** (Alpine Linux)
 - **Nix** (NixOS)
-- **Flatpak** (Universal applications)
-- **Snap** (Canonical packages)
+- **Homebrew** (Linux/macOS)
+- **Flatpak** (Universal)
+- **Snap** (Canonical)
 
 ### 🛠️ Programming Language Package Managers
-- **🐍 Python** - pip, pipx, virtual environments
+- **🐍 Python** - pip, pip --user, pipx, virtual environments
 - **📦 Node.js** - npm, yarn, pnpm, npx
-- **💎 Ruby** - gem
-- **🦀 Rust** - cargo
-- **🐹 Go** - go install
-- **☕ Java** - maven, gradle
-- **🐘 PHP** - composer
-- **🧊 Haskell** - cabal, stack
-- **🔬 Scientific** - Spack
+- **💎 Ruby** - gem, bundler
+- **🦀 Rust** - cargo, rustup
+- **🐹 Go** - go install (auto-installs Go if missing)
+- **☕ Java** - maven, gradle, SDKMAN, JDK switching
+- **🐘 PHP** - composer, PHP extensions
+- **🧊 Haskell** - cabal, stack, ghcup
+- **🔬 Scientific** - Spack, Conda/Miniconda, Mamba
 
 ### 🛠️ Installation
 
-#### Quick Install (GitHub Repository):
+#### Quick Install:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
 ```
@@ -261,71 +239,41 @@ curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.
 ```bash
 sudo rm -f /usr/local/bin/gt-clpm
 rm -f ~/.gt-clpm-lang
-rm -f ~/.gt-clpm-backup-*.txt
+rm -f ~/gt-clpm-backup-*.txt
 ```
 
 ### 🎯 Usage
-After installation, run the program with:
 ```bash
 gt-clpm
 ```
 
-### 🧠 New Features in v1.1
-
-#### Smart Removal
-```bash
-# Browse all installed packages and remove what you want
-gt-clpm → Package Manager → Smart Remove
+### 📄 Paginated Search Results (new in v1.2.2)
 ```
+Search Results (47) — Page 1/5:
+════════════════════════════════════════
+1. Telegram Desktop [flathub/stable]
+   Messaging app
+   ID: org.telegram.desktop
+...
+10. ...
 
-#### Interactive Search
-```bash
-# Search for a package and install directly from the list
-gt-clpm → Package Manager → Search → Choose package number
+  n → Next page (results 11-20)
+  0 → Return to menu
+
+Enter package number (1-47, n/p/0):
 ```
-
-#### Python Package Management
-```bash
-gt-clpm → Other Installation Methods → Python
-# Available options:
-# 1. Install with pipx (recommended)
-# 2. Install in virtual environment
-# 3. Remove Python packages
-# 4. List installed packages
-```
-
-#### Node.js Package Management
-```bash
-gt-clpm → Other Installation Methods → Node.js
-# Available options:
-# 1. Install package globally
-# 2. Install package locally
-# 3. Run package with npx
-# 4. Remove Node.js package
-```
-
-### 📸 Screenshots
-
-<img width="1440" height="900" alt="Program Interface" src="https://github.com/user-attachments/assets/754d5049-e673-42d3-9c97-3c574f337917" />
-
-*Enhanced main menu with emojis*
-
-<img width="1440" height="900" alt="Interactive Search" src="https://github.com/user-attachments/assets/sample-search-en" />
-
-*Interactive search with numbering - new in v1.1*
 
 ### 📁 Project Structure
 ```
 GT-CLPM/
-├── install.sh          # Quick installer
-├── uninstall.sh        # Quick uninstaller
-├── gt-clpm-v1.1.sh     # Main program v1.1
-├── gt-clpm-v1.0.sh     # Previous version v1.0
-└── README.md           # This file
+├── install.sh        # Quick installer
+├── uninstall.sh      # Quick uninstaller
+├── GT-CLPM/
+│   └── gt-clpm.sh    # Main program (updated in-place)
+└── README.md         # This file
 ```
 
 ### 🐛 Reporting Issues
-To report bugs or request new features:  
 [📝 Create GitHub Issue](https://github.com/SalehGNUTUX/GT-CLPM/issues)
 
 ---
@@ -339,7 +287,6 @@ This project is licensed under GPLv2. See LICENSE file for details.
 Contributions are welcome! Feel free to fork and submit Pull Requests.
 
 ## 📞 الدعم / Support
-- 📧 البريد الإلكتروني / Email: [إضافة بريدك هنا / Add your email here]
-- 💬 GitHub Issues: [رابط Issues / Issues Link](https://github.com/SalehGNUTUX/GT-CLPM/issues)
+- 💬 GitHub Issues: [https://github.com/SalehGNUTUX/GT-CLPM/issues](https://github.com/SalehGNUTUX/GT-CLPM/issues)
 
 ---
