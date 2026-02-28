@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # GT-CLPM Uninstaller
-# Version: 1.1
+# Version: 1.2.2
 # Developer: GNUTUX
 
 set -e
@@ -21,7 +21,7 @@ DESKTOP_ENTRY_DIR="/usr/share/applications"
 ICONS_DIR="/usr/share/icons/hicolor"
 LANG_FILE="$HOME/.gt-clpm-lang"
 BACKUP_FILES="$HOME/gt-clpm-backup-*.txt"
-VERSION="1.1"
+VERSION="1.2.2"
 
 # Function to print colored output
 print_status() {
