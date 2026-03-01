@@ -1,60 +1,66 @@
 # GT-CLPM - GNUTUX Command Line Package Manager
 
 ![GT-CLPM](https://img.shields.io/badge/GT--CLPM-Package_Manager-blue)
-![Version](https://img.shields.io/badge/Version-1.2.2-green)
+![Version](https://img.shields.io/badge/Version-1.4.0-green)
 ![License](https://img.shields.io/badge/License-GPLv2-orange)
 ![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey)
 
 <img width="256" height="256" alt="GT-CLPM Logo" src="https://github.com/user-attachments/assets/6805474c-a20d-4ba4-b066-cf83536dbf31" />
 
 مدير حزم سطر الأوامر الشامل لأنظمة جنو/لينكس  
-**الإصدار:** 1.2.2  
+**الإصدار:** 1.4.0  
 **المطور:** GNUTUX  
 **الرخصة:** GPLv2
 
 ---
 
-## 🆕 ما الجديد في الإصدار 1.2.2
+## 🆕 ما الجديد في الإصدار 1.4.0
 
 ### ✨ الميزات الجديدة
-- 🔍 **بحث فلاتباك مُصلَح** - نتائج صحيحة وكاملة بما فيها `org.telegram.desktop` وما شابهه
-- 📄 **تنقل بين صفحات النتائج** - استخدم `n` للصفحة التالية و`p` للسابقة
-- 🔢 **50 نتيجة** بدلاً من 20 لكل عملية بحث
-- 🛠️ **جميع قوائم أدوات اللغات مكتملة** - Ruby, Rust, Go, Java, PHP, Haskell, Scientific
-- ➕ **إدارة المستودعات** - PPA, COPR, AUR helper, Packman, RPM Fusion
-- 🍺 **دعم Homebrew** على Linux/macOS
-- 🔬 **أدوات علمية** - Spack, Conda/Miniconda, Mamba
-- 🐍 **Python محسّن** - pip --user, pipx, venv مع إدارة كاملة
-- 🐹 **Go** - تثبيت تلقائي إذا لم يكن موجوداً
+- 🖥️ **دعم KDialog و Zenity** — اكتشاف تلقائي لنوع سطح المكتب (GTK أو Qt/KDE) واختيار الأداة المناسبة
+- 🔀 **التبديل اليدوي بين Zenity و KDialog** مباشرة من قائمة الإعدادات
+- 🔐 **إصلاح صلاحيات الجذر** — نافذة كلمة مرور رسومية عبر `pkexec` أو `SUDO_ASKPASS` بدون طرفية
+- ⬆️ **ترقية شاملة (Dist Upgrade)** — خيار فرعي تحت قائمة التحديث لكل مدراء الحزم المدعومين
+- 📦 **تثبيت تلقائي للتبعيات** مع رسالة خطأ رسومية تذكر أسماء التبعيات وأوامر تثبيتها
+- 🎨 **تطبيق سمة النظام تلقائياً** (GTK_THEME من gsettings)
 
 ### 📊 مقارنة الإصدارات
 
-| الميزة | v1.0 | v1.1 | v1.2.2 |
-|--------|------|------|--------|
-| الإزالة الذكية | ❌ | ✅ | ✅ |
-| التثبيت من نتائج البحث | ❌ | ✅ | ✅ |
-| بحث فلاتباك صحيح | ❌ | ⚠️ | ✅ |
-| تنقل بين صفحات النتائج | ❌ | ❌ | ✅ |
-| أدوات اللغات (pip/pipx/gem/cargo...) | ❌ | ⚠️ جزئي | ✅ كامل |
-| إدارة المستودعات | ❌ | ❌ | ✅ |
-| Spack / Conda / Mamba | ❌ | ❌ | ✅ |
-| Homebrew | ❌ | ❌ | ✅ |
-| حد نتائج البحث | - | 20 | 50 |
+| الميزة | v1.0 | v1.1 | v1.2.2 | v1.4.0 |
+|--------|------|------|--------|--------|
+| الإزالة الذكية | ❌ | ✅ | ✅ | ✅ |
+| التثبيت من نتائج البحث | ❌ | ✅ | ✅ | ✅ |
+| بحث فلاتباك صحيح | ❌ | ⚠️ | ✅ | ✅ |
+| أدوات اللغات كاملة | ❌ | ⚠️ | ✅ | ✅ |
+| إدارة المستودعات | ❌ | ❌ | ✅ | ✅ |
+| Spack / Conda / Mamba | ❌ | ❌ | ✅ | ✅ |
+| دعم KDialog (KDE/Qt) | ❌ | ❌ | ❌ | ✅ |
+| اكتشاف سطح المكتب تلقائياً | ❌ | ❌ | ❌ | ✅ |
+| نافذة كلمة مرور رسومية | ❌ | ❌ | ❌ | ✅ |
+| ترقية شاملة (Dist Upgrade) | ❌ | ❌ | ❌ | ✅ |
+| تبديل Zenity/KDialog من الإعدادات | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
 ## 🇲🇦 العربية 🇸🇦
 
 ### 🚀 النظرة العامة
-GT-CLPM هو مدير حزم سطر أوامر شامل لأنظمة جنو/لينكس، يُتيح لك إدارة الحزم عبر أشهر مديري الحزم من خلال واجهة طرفية واحدة موحدة وسهلة الاستخدام.
+GT-CLPM هو مدير حزم شامل لأنظمة جنو/لينكس، يُتيح إدارة الحزم عبر أشهر مديري الحزم من خلال واجهة رسومية موحدة تدعم كلاً من بيئات GTK (Zenity) وبيئات Qt/KDE (KDialog) مع اكتشاف تلقائي لنوع سطح المكتب.
+
+### 🖥️ لقطات الشاشة
+
+| الواجهة الإنجليزية | الواجهة العربية |
+|---|---|
+| ![EN](https://github.com/SalehGNUTUX/GT-CLPM/blob/main/screenshot/GT-CLPM-GUI-EN.png?raw=true) | ![AR](https://github.com/SalehGNUTUX/GT-CLPM/blob/main/screenshot/GT-CLPM-GUI-AR.png?raw=true) |
 
 ### ✨ المميزات الرئيسية
 - 🌐 دعم لغات متعددة (العربية والإنجليزية)
 - 📦 دعم 13+ مدير حزم مختلف
+- 🖥️ دعم Zenity (GTK) و KDialog (Qt/KDE) مع اكتشاف تلقائي
+- 🔐 نافذة كلمة مرور رسومية عند الحاجة لصلاحيات الجذر
+- ⬆️ ترقية شاملة للنظام (Dist Upgrade) لكل المدراء المدعومين
 - 📱 دعم فلاتباك وسناب مع بحث تفاعلي مُصلَح
-- 📄 تصفح نتائج البحث بالصفحات (n/p)
 - ⚙️ أدوات صيانة النظام والنسخ الاحتياطي
-- 🎨 واجهة ملونة وسهلة الاستخدام
 - 🔧 إصلاح الحزم المعطلة تلقائياً
 - 🧠 إزالة ذكية للحزم
 - 🛠️ إدارة المستودعات والـ PPA
@@ -86,101 +92,104 @@ GT-CLPM هو مدير حزم سطر أوامر شامل لأنظمة جنو/لي
 - **🧊 Haskell** - cabal, stack, ghcup
 - **🔬 Scientific** - Spack, Conda/Miniconda, Mamba
 
-### 🛠️ التثبيت
+### 📥 التثبيت
 
-#### التثبيت السريع:
+#### تثبيت الواجهة الرسومية (GUI):
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
-```
-
-#### باستخدام wget:
-```bash
-wget -q -O - https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh | bash
 ```
 
 #### التثبيت اليدوي:
 ```bash
 git clone https://github.com/SalehGNUTUX/GT-CLPM.git
 cd GT-CLPM
-chmod +x install.sh
-./install.sh
+chmod +x install-gui.sh
+./install-gui.sh
+```
+
+### 📦 تنزيل AppImage (بدون تثبيت)
+
+| الإصدار | الرابط |
+|---------|--------|
+| واجهة رسومية (GUI) | [GT-CLPM-GUI-x86_64.AppImage](https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM-GUI-x86_64.AppImage) |
+| سطر أوامر (CLI) | [GT-CLPM_.CLI.-x86_64.AppImage](https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM_.CLI.-x86_64.AppImage) |
+| جميع الإصدارات | [صفحة الإصدارات](https://github.com/SalehGNUTUX/GT-CLPM/releases) |
+
+```bash
+# تشغيل AppImage مباشرة
+chmod +x GT-CLPM-GUI-x86_64.AppImage
+./GT-CLPM-GUI-x86_64.AppImage
 ```
 
 ### 🗑️ إلغاء التثبيت
 
 #### إلغاء التثبيت عن بُعد:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh | bash
 ```
 
-#### إلغاء التثبيت المحلي:
+#### إلغاء التثبيت اليدوي:
 ```bash
-sudo rm -f /usr/local/bin/gt-clpm
-rm -f ~/.gt-clpm-lang
+sudo rm -f /usr/local/bin/gt-clpm-gui
+rm -f ~/.gt-clpm-lang ~/.gt-clpm-mode ~/.gt-clpm-ui
 rm -f ~/gt-clpm-backup-*.txt
 ```
 
 ### 🎯 طريقة الاستخدام
 ```bash
-gt-clpm
+gt-clpm-gui
 ```
 
-### 📄 التنقل في نتائج البحث (جديد في v1.2.2)
-```
-Search Results (47) — Page 1/5:
-════════════════════════════════════════
-1. Telegram Desktop [flathub/stable]
-   ...
-10. ...
+### ⚙️ الإعدادات المتاحة
+- **تغيير اللغة** — العربية / الإنجليزية
+- **تغيير النمط** — فاتح / داكن (يتبع سمة النظام تلقائياً)
+- **تغيير أداة الواجهة** — التبديل بين Zenity و KDialog
 
-  n → Next page (results 11-20)
-  0 → Return to menu
-
-Enter package number (1-47, n/p/0): n   ← للصفحة التالية
+### ⬆️ قائمة التحديث (جديد في v1.4.0)
+عند اختيار "تحديث النظام" تظهر قائمة فرعية:
 ```
-
-### 📁 الهيكل التنظيمي
+┌─────────────────────────────────┐
+│  تحديث النظام (upgrade)         │
+│  ترقية شاملة (dist-upgrade)     │
+│  رجوع                           │
+└─────────────────────────────────┘
 ```
-GT-CLPM/
-├── install.sh        # مثبت سريع
-├── uninstall.sh      # مزيل سريع
-├── GT-CLPM/
-│   └── gt-clpm.sh    # البرنامج الرئيسي (يُحدَّث في مكانه)
-└── README.md         # هذا الملف
-```
-
-### 🐛 الإبلاغ عن المشكلات
-[📝 إنشاء إشكالية على GitHub](https://github.com/SalehGNUTUX/GT-CLPM/issues)
+> **ملاحظة:** خيار الترقية الشاملة يعمل مع: APT (dist-upgrade), DNF (distro-sync), Pacman (Syyu), Zypper (dup). في المدراء الأخرى تظهر رسالة توضيحية.
 
 ---
 
 ## 🇬🇧 English
 
 ### 🚀 Overview
-GT-CLPM is a comprehensive command-line package manager for GNU/Linux systems. It provides a unified terminal interface for managing packages across 13+ package managers, with full support for language-specific package tools and universal formats like Flatpak and Snap.
+GT-CLPM is a comprehensive GUI package manager for GNU/Linux. It provides a unified graphical interface for managing packages across 13+ package managers, with automatic detection of the desktop environment to use Zenity (GTK) or KDialog (Qt/KDE) accordingly.
+
+### 🖥️ Screenshots
+
+| English Interface | Arabic Interface |
+|---|---|
+| ![EN](https://github.com/SalehGNUTUX/GT-CLPM/blob/main/screenshot/GT-CLPM-GUI-EN.png?raw=true) | ![AR](https://github.com/SalehGNUTUX/GT-CLPM/blob/main/screenshot/GT-CLPM-GUI-AR.png?raw=true) |
 
 ### ✨ Key Features
 - 🌐 Multi-language support (Arabic & English)
 - 📦 Support for 13+ system package managers
+- 🖥️ Auto-detects desktop environment — uses Zenity (GTK) or KDialog (Qt/KDE)
+- 🔐 Graphical root password prompt via `pkexec` / `SUDO_ASKPASS` — no terminal needed
+- ⬆️ Full system upgrade (dist-upgrade) submenu for all supported package managers
 - 📱 Fixed Flatpak & Snap search with interactive selection
-- 📄 Paginated search results (n/p navigation)
-- ⚙️ System maintenance and backup/restore tools
-- 🎨 Colorful and user-friendly terminal interface
+- ⚙️ System maintenance, backup & restore tools
 - 🔧 Automatic broken package repair
 - 🧠 Smart package removal (browse & select)
 - ➕ Repository/PPA management per distro
 - 🐍 Full programming language package manager support
 
-### 🆕 What's New in v1.2.2
+### 🆕 What's New in v1.4.0
 
-- 🔍 **Fixed Flatpak search** — correct results including `org.telegram.desktop` and similar
-- 📄 **Paginated results** — `n` next page, `p` previous page, up to 50 results loaded
-- 🛠️ **All language tool menus fully implemented** — Ruby, Rust, Go, Java, PHP, Haskell, Scientific
-- ➕ **Repository management** — PPA (APT), COPR (DNF), AUR helper (Pacman), Packman (Zypper)
-- 🍺 **Homebrew support** added
-- 🔬 **Scientific tools** — Spack, Conda/Miniconda, Mamba with environment management
-- 🐍 **Enhanced Python tools** — pip --user, pipx, named venvs
-- 🐹 **Go auto-install** if not present
+- 🖥️ **KDialog support** — auto-detects KDE/Qt desktops and uses KDialog natively
+- 🔀 **Manual UI switcher** — switch between Zenity and KDialog from Settings
+- 🔐 **Fixed root privileges** — graphical password dialog via `pkexec` or `SUDO_ASKPASS`, no terminal window required
+- ⬆️ **Dist Upgrade submenu** — separate option under system update for full distribution upgrade
+- 📦 **Auto dependency install** — attempts automatic install of missing UI tools with a clear error message listing dependency names and install commands if it fails
+- 🎨 **System theme applied automatically** (reads `GTK_THEME` from gsettings)
 
 ### 📋 Supported System Package Managers
 - **APT** (Debian, Ubuntu, Mint)
@@ -208,69 +217,78 @@ GT-CLPM is a comprehensive command-line package manager for GNU/Linux systems. I
 - **🧊 Haskell** - cabal, stack, ghcup
 - **🔬 Scientific** - Spack, Conda/Miniconda, Mamba
 
-### 🛠️ Installation
+### 📥 Installation
 
-#### Quick Install:
+#### GUI Install:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
-```
-
-#### Using wget:
-```bash
-wget -q -O - https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh | bash
 ```
 
 #### Manual Installation:
 ```bash
 git clone https://github.com/SalehGNUTUX/GT-CLPM.git
 cd GT-CLPM
-chmod +x install.sh
-./install.sh
+chmod +x install-gui.sh
+./install-gui.sh
+```
+
+### 📦 Download AppImage (no install required)
+
+| Edition | Link |
+|---------|------|
+| Graphical UI (GUI) | [GT-CLPM-GUI-x86_64.AppImage](https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM-GUI-x86_64.AppImage) |
+| Command Line (CLI) | [GT-CLPM_.CLI.-x86_64.AppImage](https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM_.CLI.-x86_64.AppImage) |
+| All releases | [Releases page](https://github.com/SalehGNUTUX/GT-CLPM/releases) |
+
+```bash
+# Run AppImage directly
+chmod +x GT-CLPM-GUI-x86_64.AppImage
+./GT-CLPM-GUI-x86_64.AppImage
 ```
 
 ### 🗑️ Uninstallation
 
 #### Remote Uninstall:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh | bash
 ```
 
-#### Local Uninstall:
+#### Manual Uninstall:
 ```bash
-sudo rm -f /usr/local/bin/gt-clpm
-rm -f ~/.gt-clpm-lang
+sudo rm -f /usr/local/bin/gt-clpm-gui
+rm -f ~/.gt-clpm-lang ~/.gt-clpm-mode ~/.gt-clpm-ui
 rm -f ~/gt-clpm-backup-*.txt
 ```
 
 ### 🎯 Usage
 ```bash
-gt-clpm
+gt-clpm-gui
 ```
 
-### 📄 Paginated Search Results (new in v1.2.2)
-```
-Search Results (47) — Page 1/5:
-════════════════════════════════════════
-1. Telegram Desktop [flathub/stable]
-   Messaging app
-   ID: org.telegram.desktop
-...
-10. ...
+### ⚙️ Available Settings
+- **Change language** — Arabic / English
+- **Change theme** — Light / Dark (auto-detected from system)
+- **Change UI tool** — Switch between Zenity and KDialog
 
-  n → Next page (results 11-20)
-  0 → Return to menu
-
-Enter package number (1-47, n/p/0):
+### ⬆️ Update Submenu (new in v1.4.0)
+Selecting "Update system packages" now opens a submenu:
 ```
+┌──────────────────────────────────────┐
+│  Update system (upgrade)             │
+│  Full system upgrade (dist-upgrade)  │
+│  Back                                │
+└──────────────────────────────────────┘
+```
+> **Note:** dist-upgrade maps to: APT (`dist-upgrade`), DNF (`distro-sync`), Pacman (`-Syyu`), Zypper (`dup`). Other package managers display an informational message.
 
 ### 📁 Project Structure
 ```
 GT-CLPM/
-├── install.sh        # Quick installer
-├── uninstall.sh      # Quick uninstaller
+├── install-gui.sh        # GUI installer
+├── uninstall-gui.sh      # GUI uninstaller
 ├── GT-CLPM/
-│   └── gt-clpm.sh    # Main program (updated in-place)
-└── README.md         # This file
+│   └── gt-clpm-gui.sh    # Main GUI script
+└── README.md             # This file
 ```
 
 ### 🐛 Reporting Issues
@@ -288,5 +306,6 @@ Contributions are welcome! Feel free to fork and submit Pull Requests.
 
 ## 📞 الدعم / Support
 - 💬 GitHub Issues: [https://github.com/SalehGNUTUX/GT-CLPM/issues](https://github.com/SalehGNUTUX/GT-CLPM/issues)
+- 📦 Releases: [https://github.com/SalehGNUTUX/GT-CLPM/releases](https://github.com/SalehGNUTUX/GT-CLPM/releases)
 
 ---
