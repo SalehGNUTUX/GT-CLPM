@@ -94,17 +94,29 @@ GT-CLPM هو مدير حزم شامل لأنظمة جنو/لينكس، يُتي�
 
 ### 📥 التثبيت
 
-#### تثبيت الواجهة الرسومية (GUI):
+#### 🖥️ تثبيت الواجهة الرسومية (GUI):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh | bash
+```
+
+#### 💻 تثبيت نسخة سطر الأوامر (CLI):
+```bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
+```
+
+#### باستخدام wget (CLI):
+```bash
+wget -q -O - https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
 ```
 
 #### التثبيت اليدوي:
 ```bash
 git clone https://github.com/SalehGNUTUX/GT-CLPM.git
 cd GT-CLPM
-chmod +x install-gui.sh
-./install-gui.sh
+# للواجهة الرسومية
+chmod +x install-gui.sh && ./install-gui.sh
+# لسطر الأوامر
+chmod +x install.sh && ./install.sh
 ```
 
 ### 📦 تنزيل AppImage (بدون تثبيت)
@@ -123,27 +135,54 @@ chmod +x GT-CLPM-GUI-x86_64.AppImage
 
 ### 🗑️ إلغاء التثبيت
 
-#### إلغاء التثبيت عن بُعد:
+#### إلغاء تثبيت الواجهة الرسومية عن بُعد:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh | bash
 ```
 
+#### إلغاء تثبيت سطر الأوامر عن بُعد:
+```bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash
+```
+
 #### إلغاء التثبيت اليدوي:
 ```bash
+# الواجهة الرسومية
 sudo rm -f /usr/local/bin/gt-clpm-gui
 rm -f ~/.gt-clpm-lang ~/.gt-clpm-mode ~/.gt-clpm-ui
+# سطر الأوامر
+sudo rm -f /usr/local/bin/gt-clpm
+rm -f ~/.gt-clpm-lang
 rm -f ~/gt-clpm-backup-*.txt
 ```
 
 ### 🎯 طريقة الاستخدام
 ```bash
+# الواجهة الرسومية
 gt-clpm-gui
+
+# سطر الأوامر
+gt-clpm
 ```
 
 ### ⚙️ الإعدادات المتاحة
 - **تغيير اللغة** — العربية / الإنجليزية
 - **تغيير النمط** — فاتح / داكن (يتبع سمة النظام تلقائياً)
 - **تغيير أداة الواجهة** — التبديل بين Zenity و KDialog
+
+### 📄 التنقل في نتائج البحث — نسخة سطر الأوامر (CLI)
+```
+Search Results (47) — Page 1/5:
+════════════════════════════════════════
+1. Telegram Desktop [flathub/stable]
+   ...
+10. ...
+
+  n → Next page (results 11-20)
+  0 → Return to menu
+
+Enter package number (1-47, n/p/0): n   ← للصفحة التالية
+```
 
 ### ⬆️ قائمة التحديث (جديد في v1.4.0)
 عند اختيار "تحديث النظام" تظهر قائمة فرعية:
@@ -219,17 +258,29 @@ GT-CLPM is a comprehensive GUI package manager for GNU/Linux. It provides a unif
 
 ### 📥 Installation
 
-#### GUI Install:
+#### 🖥️ GUI Install:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh | bash
+```
+
+#### 💻 CLI Install:
+```bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
+```
+
+#### Using wget (CLI):
+```bash
+wget -q -O - https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash
 ```
 
 #### Manual Installation:
 ```bash
 git clone https://github.com/SalehGNUTUX/GT-CLPM.git
 cd GT-CLPM
-chmod +x install-gui.sh
-./install-gui.sh
+# For GUI
+chmod +x install-gui.sh && ./install-gui.sh
+# For CLI
+chmod +x install.sh && ./install.sh
 ```
 
 ### 📦 Download AppImage (no install required)
@@ -248,27 +299,56 @@ chmod +x GT-CLPM-GUI-x86_64.AppImage
 
 ### 🗑️ Uninstallation
 
-#### Remote Uninstall:
+#### Remote GUI Uninstall:
 ```bash
 curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh | bash
 ```
 
+#### Remote CLI Uninstall:
+```bash
+curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash
+```
+
 #### Manual Uninstall:
 ```bash
+# GUI
 sudo rm -f /usr/local/bin/gt-clpm-gui
 rm -f ~/.gt-clpm-lang ~/.gt-clpm-mode ~/.gt-clpm-ui
+# CLI
+sudo rm -f /usr/local/bin/gt-clpm
+rm -f ~/.gt-clpm-lang
 rm -f ~/gt-clpm-backup-*.txt
 ```
 
 ### 🎯 Usage
 ```bash
+# GUI
 gt-clpm-gui
+
+# CLI
+gt-clpm
 ```
 
 ### ⚙️ Available Settings
 - **Change language** — Arabic / English
 - **Change theme** — Light / Dark (auto-detected from system)
 - **Change UI tool** — Switch between Zenity and KDialog
+
+### 📄 Paginated Search Results — CLI
+```
+Search Results (47) — Page 1/5:
+════════════════════════════════════════
+1. Telegram Desktop [flathub/stable]
+   Messaging app
+   ID: org.telegram.desktop
+...
+10. ...
+
+  n → Next page (results 11-20)
+  0 → Return to menu
+
+Enter package number (1-47, n/p/0):
+```
 
 ### ⬆️ Update Submenu (new in v1.4.0)
 Selecting "Update system packages" now opens a submenu:
@@ -284,9 +364,12 @@ Selecting "Update system packages" now opens a submenu:
 ### 📁 Project Structure
 ```
 GT-CLPM/
+├── install.sh            # CLI installer
+├── uninstall.sh          # CLI uninstaller
 ├── install-gui.sh        # GUI installer
 ├── uninstall-gui.sh      # GUI uninstaller
 ├── GT-CLPM/
+│   ├── gt-clpm.sh        # Main CLI script
 │   └── gt-clpm-gui.sh    # Main GUI script
 └── README.md             # This file
 ```
