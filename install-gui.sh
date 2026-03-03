@@ -18,13 +18,15 @@ NC='\033[0m'
 VERSION="1.5.0"
 REPO_URL="https://github.com/SalehGNUTUX/GT-CLPM"
 SCRIPT_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-gui.sh"
-ICONS_BASE_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-usdr%20APPIAMGE%20BIULD/GT-CLPM-GUI.AppDir/usr/share/icons/hicolor"
+ICON_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-gui-icon.png"
 INSTALL_DIR="/usr/local/bin"
 SCRIPT_NAME="gt-clpm-gui"
 DESKTOP_ENTRY_DIR="/usr/share/applications"
 ICONS_DIR="/usr/share/icons/hicolor"
-ICON_NAME="gt-clpm-gui-icon.png"
 INSTALLED_ICON_NAME="gt-clpm-gui.png"
+UNINSTALLER_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh"
+UNINSTALLER_LOCAL_DIR="$HOME/.local/share/gt-clpm"
+UNINSTALLER_LOCAL="$UNINSTALLER_LOCAL_DIR/uninstall-gui.sh"
 
 # ─── Output helpers ───────────────────────────────────────────────────────────
 print_status()  { echo -e "${GREEN}[INFO]${NC} $1"; }
@@ -157,51 +159,70 @@ install_script() {
     fi
 }
 
-# ─── Download and install icons ───────────────────────────────────────────────
+
+# ─── Download and save uninstaller locally ────────────────────────────────────
+save_uninstaller() {
+    print_status "Saving uninstaller locally..."
+
+    mkdir -p "$UNINSTALLER_LOCAL_DIR"
+
+    if command -v curl &>/dev/null; then
+        curl -fsSL "$UNINSTALLER_URL" -o "$UNINSTALLER_LOCAL" 2>/dev/null || true
+    else
+        wget -q "$UNINSTALLER_URL" -O "$UNINSTALLER_LOCAL" 2>/dev/null || true
+    fi
+
+    if [[ -s "$UNINSTALLER_LOCAL" ]]; then
+        chmod +x "$UNINSTALLER_LOCAL"
+        print_success "Uninstaller saved at $UNINSTALLER_LOCAL"
+    else
+        print_warning "Could not save uninstaller locally (non-critical)"
+        rm -f "$UNINSTALLER_LOCAL"
+    fi
+}
+
+# ─── Download and install icon ────────────────────────────────────────────────
 install_icons() {
     print_status "Installing application icons..."
 
-    local temp_icons_dir="/tmp/gt-clpm-gui-icons"
-    mkdir -p "$temp_icons_dir"
-
+    local temp_icon="/tmp/gt-clpm-gui-icon.png"
     local icon_sizes=("16x16" "32x32" "48x48" "64x64" "128x128" "256x256" "512x512")
     local icons_ok=0
 
+    # Download source icon
+    if command -v curl &>/dev/null; then
+        curl -fsSL "$ICON_URL" -o "$temp_icon" 2>/dev/null || true
+    else
+        wget -q "$ICON_URL" -O "$temp_icon" 2>/dev/null || true
+    fi
+
+    # Validate it's actually an image
+    if [[ ! -f "$temp_icon" ]] || ! file "$temp_icon" 2>/dev/null | grep -qi "PNG\|image"; then
+        print_warning "Icon download failed or invalid — skipping icon installation"
+        rm -f "$temp_icon"
+        return 0
+    fi
+
+    # Install to all icon sizes (same source image, each size folder)
     for size in "${icon_sizes[@]}"; do
-        local icon_url="${ICONS_BASE_URL}/${size}/apps/${ICON_NAME}"
         local icon_dir="$ICONS_DIR/${size}/apps"
-        local tmp_file="$temp_icons_dir/gt-clpm-gui-${size}.png"
-
-        if command -v curl &>/dev/null; then
-            curl -fsSL "$icon_url" -o "$tmp_file" 2>/dev/null || { print_warning "Skipping ${size} icon (download failed)"; continue; }
-        else
-            wget -q "$icon_url" -O "$tmp_file" 2>/dev/null || { print_warning "Skipping ${size} icon (download failed)"; continue; }
-        fi
-
-        # Verify it is a valid PNG (non-empty file)
-        if [[ ! -s "$tmp_file" ]]; then
-            print_warning "Skipping ${size} icon (empty file)"
-            rm -f "$tmp_file"
-            continue
-        fi
-
         if [[ ! -w "$ICONS_DIR" ]]; then
             sudo mkdir -p "$icon_dir"
-            sudo cp "$tmp_file" "$icon_dir/$INSTALLED_ICON_NAME"
+            sudo cp "$temp_icon" "$icon_dir/$INSTALLED_ICON_NAME"
             sudo chmod 644 "$icon_dir/$INSTALLED_ICON_NAME"
         else
             mkdir -p "$icon_dir"
-            cp "$tmp_file" "$icon_dir/$INSTALLED_ICON_NAME"
+            cp "$temp_icon" "$icon_dir/$INSTALLED_ICON_NAME"
             chmod 644 "$icon_dir/$INSTALLED_ICON_NAME"
         fi
         print_status "✓ ${size} icon installed"
-        icons_ok=$((icons_ok + 1))
+        ((icons_ok++))
     done
 
-    rm -rf "$temp_icons_dir"
+    rm -f "$temp_icon"
 
     if [[ $icons_ok -eq 0 ]]; then
-        print_warning "No icons were installed (check repository icon paths)"
+        print_warning "No icons were installed"
     else
         print_success "$icons_ok icon size(s) installed"
     fi
@@ -243,16 +264,6 @@ Keywords[ar]=حزم;مدير;تثبيت;إزالة;تحديث;نظام;لينك�
 
 # ─── Update desktop/icon databases ────────────────────────────────────────────
 update_desktop_database() {
-    local desktop_file="$DESKTOP_ENTRY_DIR/gt-clpm-gui.desktop"
-
-    # ── xdg-desktop-menu (standard — GTK and KDE) ──
-    if command -v xdg-desktop-menu &>/dev/null; then
-        print_status "Registering application via xdg-desktop-menu..."
-        xdg-desktop-menu install --novendor "$desktop_file" 2>/dev/null || true
-        print_success "Application registered via xdg-desktop-menu"
-    fi
-
-    # ── update-desktop-database (GNOME / GTK) ──
     if command -v update-desktop-database &>/dev/null; then
         print_status "Updating desktop database..."
         if [[ ! -w "$DESKTOP_ENTRY_DIR" ]]; then
@@ -263,31 +274,15 @@ update_desktop_database() {
         print_success "Desktop database updated"
     fi
 
-    # ── gtk-update-icon-cache (GTK icon theme) ──
     if command -v gtk-update-icon-cache &>/dev/null && [[ -d "$ICONS_DIR" ]]; then
-        print_status "Updating GTK icon cache..."
+        print_status "Updating icon cache..."
         if [[ ! -w "$ICONS_DIR" ]]; then
             sudo gtk-update-icon-cache -f -t "$ICONS_DIR" 2>/dev/null || true
         else
             gtk-update-icon-cache -f -t "$ICONS_DIR" 2>/dev/null || true
         fi
-        print_success "GTK icon cache updated"
+        print_success "Icon cache updated"
     fi
-
-    # ── xdg-icon-resource forceupdate ──
-    if command -v xdg-icon-resource &>/dev/null; then
-        xdg-icon-resource forceupdate 2>/dev/null || true
-    fi
-
-    # ── KDE: kbuildsycoca (rebuilds KDE app menu cache) ──
-    for kbuild in kbuildsycoca6 kbuildsycoca5 kbuildsycoca; do
-        if command -v "$kbuild" &>/dev/null; then
-            print_status "Updating KDE application cache ($kbuild)..."
-            "$kbuild" --noincremental 2>/dev/null || true
-            print_success "KDE application cache updated"
-            break
-        fi
-    done
 }
 
 # ─── Verify installation ──────────────────────────────────────────────────────
@@ -373,6 +368,7 @@ main() {
     download_script
     make_executable
     install_script
+    save_uninstaller
     install_icons
     create_desktop_entry
     update_desktop_database
