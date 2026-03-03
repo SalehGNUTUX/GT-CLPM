@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# مشغل AppImage - GT-CLPM GUI
+# يحل مشكلة pkexec + APPDIR + المسافات في المسار
+
+# ── 1. تحديد APPDIR بشكل موثوق ────────────────────────────────────────────────
+# AppImage runtime يُعيّن $APPDIR تلقائياً — نستخدمه مباشرة
+# إذا لم يكن موجوداً (تشغيل مباشر) نحسبه يدوياً
+if [[ -z "$APPDIR" ]]; then
+    APPDIR="$(dirname "$(readlink -f "$0")")"
+fi
+
+EXEC="${APPDIR}/usr/bin/gt-clpm-gui"
+
+# ── 2. التحقق من الملف التنفيذي ───────────────────────────────────────────────
+if [[ ! -f "$EXEC" ]]; then
+    zenity --error --title="GT-CLPM" \
+        --text="الملف التنفيذي غير موجود:\n${EXEC}" \
+        --width=500 2>/dev/null
+    exit 1
+fi
+
+# ── 3. التحقق من Zenity ────────────────────────────────────────────────────────
+if ! command -v zenity &>/dev/null; then
+    for term in x-terminal-emulator gnome-terminal xterm konsole; do
+        if command -v "$term" &>/dev/null; then
+            "$term" -e bash -c \
+                "echo 'Zenity مطلوب. ثبّته: sudo apt install zenity'; read"
+            break
+        fi
+    done
+    exit 1
+fi
+
+# ── 4. إخفاء تحذيرات GTK غير المؤثرة ─────────────────────────────────────────
+export GTK_DEBUG=""
+export G_MESSAGES_DEBUG=""
+
+# ── 5. تشغيل البرنامج ─────────────────────────────────────────────────────────
+# نُشغّله مباشرة بدون pkexec — sudo يُنجز ذلك عبر zenity --password
+# البرنامج نفسه يستدعي sudo داخلياً عند الحاجة
+exec "$EXEC" "$@"

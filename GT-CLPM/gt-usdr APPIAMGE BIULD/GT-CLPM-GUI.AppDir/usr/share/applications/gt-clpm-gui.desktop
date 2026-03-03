@@ -1,0 +1,16 @@
+[Desktop Entry]
+Version=1.2
+Type=Application
+Name=GT-CLPM (GUI)
+Name[ar]=مدير الحزم جنوتوكس (رسومي)
+GenericName=Package Manager
+GenericName[ar]=مدير الحزم
+Comment=GNUTUX Command Line Package Manager - Graphical Edition v1.2.2
+Comment[ar]=مدير حزم جنوتوكس بواجهة رسومية - الإصدار 1.2.2
+Exec=gt-clpm-gui
+Icon=gt-clpm-gui-icon
+Terminal=false
+Categories=System;
+Keywords=package;manager;gui;graphical;zenity;linux;gnutux;flatpak;snap;
+Keywords[ar]=مدير;حزم;رسومي;واجهة;لينكس;جنوتوكس;فلاتباك;سناب;
+StartupNotify=true
