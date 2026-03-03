@@ -107,7 +107,7 @@ remove_icons() {
             else
                 rm -f "$icon_path"
             fi
-            ((icons_removed++))
+            icons_removed=$((icons_removed + 1))
             print_success "Removed ${size} icon"
 
             # Remove empty directories
@@ -195,6 +195,16 @@ remove_config_files() {
 
 # ─── Update desktop database and icon cache ───────────────────────────────────
 update_system_databases() {
+    local desktop_file="$DESKTOP_ENTRY_DIR/gt-clpm-gui.desktop"
+
+    # ── xdg-desktop-menu uninstall (standard — GTK and KDE) ──
+    if command -v xdg-desktop-menu &>/dev/null; then
+        print_status "Unregistering application via xdg-desktop-menu..."
+        xdg-desktop-menu uninstall --novendor "$desktop_file" 2>/dev/null || true
+        print_success "Application unregistered via xdg-desktop-menu"
+    fi
+
+    # ── update-desktop-database (GNOME / GTK) ──
     if command -v update-desktop-database &>/dev/null; then
         print_status "Updating desktop database..."
         local desktop_dirs=("$DESKTOP_ENTRY_DIR" "/usr/local/share/applications")
@@ -212,17 +222,33 @@ update_system_databases() {
         print_warning "update-desktop-database not found, skipping"
     fi
 
+    # ── gtk-update-icon-cache (GTK icon theme) ──
     if command -v gtk-update-icon-cache &>/dev/null && [[ -d "$ICONS_DIR" ]]; then
-        print_status "Updating icon cache..."
+        print_status "Updating GTK icon cache..."
         if [[ ! -w "$ICONS_DIR" ]]; then
             sudo gtk-update-icon-cache -f -t "$ICONS_DIR" 2>/dev/null || true
         else
             gtk-update-icon-cache -f -t "$ICONS_DIR" 2>/dev/null || true
         fi
-        print_success "Icon cache updated"
+        print_success "GTK icon cache updated"
     else
         print_warning "gtk-update-icon-cache not found, skipping"
     fi
+
+    # ── xdg-icon-resource forceupdate ──
+    if command -v xdg-icon-resource &>/dev/null; then
+        xdg-icon-resource forceupdate 2>/dev/null || true
+    fi
+
+    # ── KDE: kbuildsycoca (rebuilds KDE app menu cache) ──
+    for kbuild in kbuildsycoca6 kbuildsycoca5 kbuildsycoca; do
+        if command -v "$kbuild" &>/dev/null; then
+            print_status "Updating KDE application cache ($kbuild)..."
+            "$kbuild" --noincremental 2>/dev/null || true
+            print_success "KDE application cache updated"
+            break
+        fi
+    done
 }
 
 # ─── Verify uninstallation ────────────────────────────────────────────────────
