@@ -73,16 +73,39 @@ fi
 # ─── الوضع الداكن / الفاتح ────────────────────────────────────────────────────
 MODE_FILE="$HOME/.gt-clpm-mode"
 detect_system_dark() {
+    # ── KDE / Plasma ──
+    for kread in kreadconfig6 kreadconfig5; do
+        if command -v "$kread" &>/dev/null; then
+            local scheme
+            scheme=$("$kread" --group General --key ColorScheme 2>/dev/null || true)
+            echo "$scheme" | grep -qi "dark\|breeze-dark\|breezedark" && { echo "dark"; return; }
+            break
+        fi
+    done
+    local kdeglobals="$HOME/.config/kdeglobals"
+    if [[ -f "$kdeglobals" ]]; then
+        grep -q -i "dark" <(grep -i "^ColorScheme=" "$kdeglobals" 2>/dev/null) 2>/dev/null && { echo "dark"; return; }
+    fi
+
+    # ── GNOME / GTK via gsettings ──
+    if command -v gsettings &>/dev/null; then
+        local cs; cs=$(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || true)
+        echo "$cs" | grep -qi "dark" && { echo "dark"; return; }
+        local gtheme; gtheme=$(gsettings get org.gnome.desktop.interface gtk-theme 2>/dev/null || true)
+        echo "$gtheme" | grep -qi "dark" && { echo "dark"; return; }
+    fi
+
+    # ── GTK config files ──
     local g3="$HOME/.config/gtk-3.0/settings.ini"
     local g4="$HOME/.config/gtk-4.0/settings.ini"
     if grep -q "gtk-application-prefer-dark-theme=1" "$g3" 2>/dev/null ||
        grep -q "gtk-application-prefer-dark-theme=1" "$g4" 2>/dev/null ||
        grep -q "color-scheme=prefer-dark"            "$g3" 2>/dev/null ||
        grep -q "color-scheme=prefer-dark"            "$g4" 2>/dev/null; then
-        echo "dark"
-    else
-        echo "light"
+        echo "dark"; return
     fi
+
+    echo "light"
 }
 [[ -f "$MODE_FILE" ]] && CURRENT_MODE=$(cat "$MODE_FILE") \
                       || CURRENT_MODE=$(detect_system_dark)
@@ -94,29 +117,7 @@ set_zenity_env() {
         export GTK_THEME="Adwaita:light"
     fi
 }
-
-apply_text_direction() {
-    # تطبيق اتجاه النص RTL للعربية على zenity
-    if [[ "$CURRENT_LANG" == "ar" ]]; then
-        export GTK_USE_PORTAL=0
-        # إضافة RTL عبر ملف إعداد GTK مؤقت
-        local gtk3_cfg="$HOME/.config/gtk-3.0"
-        mkdir -p "$gtk3_cfg"
-        local tmp_settings="$gtk3_cfg/settings.ini"
-        if [[ ! -f "$tmp_settings" ]] || ! grep -q "gtk-im-module" "$tmp_settings" 2>/dev/null; then
-            # إضافة إعداد RTL فقط إن لم يكن موجوداً
-            true
-        fi
-        # الاعتماد على LANGUAGE لتوجيه GTK
-        export LANGUAGE="ar_AR.UTF-8:ar:en"
-        export LC_MESSAGES="ar_AR.UTF-8"
-    else
-        export LANGUAGE="en_US.UTF-8:en"
-        export LC_MESSAGES="en_US.UTF-8"
-    fi
-}
 set_zenity_env
-apply_text_direction
 
 # ─── شيم zenity → kdialog (يُفعَّل تلقائياً عند اختيار KDialog) ────────────
 # يعترض جميع استدعاءات zenity في الكود ويُترجمها إلى kdialog
@@ -332,14 +333,14 @@ declare -A MESSAGES_EN=(
     ["check_update"]="🔄 Check for updates"
     ["uninstall_app"]="🗑️ Uninstall GT-CLPM GUI"
     ["update_available"]="🎉 Update available!"
-    ["no_update"]="✅ You are using the latest version."
+    ["no_update"]="✅ You are on the latest version."
     ["update_now"]="Update now"
-    ["update_later"]="Remind me later"
-    ["uninstall_confirm"]="Are you sure you want to uninstall GT-CLPM GUI?"
-    ["uninstall_not_found"]="Uninstaller not found. Download it?"
-    ["checking_update"]="Checking for updates..."
+    ["remind_later"]="Remind me later"
     ["update_error"]="Could not check for updates. Check your connection."
+    ["uninstall_confirm"]="Are you sure you want to uninstall GT-CLPM GUI?"
+    ["uninstaller_missing"]="Uninstaller not found locally. Download it?"
 )
+
 
 declare -A MESSAGES_AR=(
     ["title"]="GT-CLPM - مدير حزم سطر الأوامر من جنوتكس"
@@ -442,15 +443,15 @@ declare -A MESSAGES_AR=(
     ["ui_tool_changed"]="✅ تم تغيير أداة الواجهة. أعد التشغيل لتطبيق التغيير."
     ["check_update"]="🔄 فحص التحديثات"
     ["uninstall_app"]="🗑️ إلغاء تثبيت GT-CLPM GUI"
-    ["update_available"]="🎉 تحديث متوفر!"
+    ["update_available"]="🎉 يوجد تحديث متاح!"
     ["no_update"]="✅ أنت تستخدم أحدث إصدار."
     ["update_now"]="تحديث الآن"
-    ["update_later"]="تذكيري لاحقاً"
+    ["remind_later"]="تذكيري لاحقاً"
+    ["update_error"]="تعذّر الاتصال. تحقق من الإنترنت."
     ["uninstall_confirm"]="هل أنت متأكد من إلغاء تثبيت GT-CLPM GUI؟"
-    ["uninstall_not_found"]="ملف إلغاء التثبيت غير موجود. هل تريد تنزيله؟"
-    ["checking_update"]="جاري فحص التحديثات..."
-    ["update_error"]="تعذّر الاتصال للتحقق من التحديثات."
+    ["uninstaller_missing"]="ملف إلغاء التثبيت غير موجود. هل تريد تنزيله؟"
 )
+
 
 get_msg() { echo "${MESSAGES_EN[$1]}"; [[ "$CURRENT_LANG" == "ar" ]] && echo "${MESSAGES_AR[$1]}" || echo "${MESSAGES_EN[$1]}"; }
 get_msg() {
@@ -1174,7 +1175,7 @@ view_repositories() {
     local cmd
     case $pm in
         apt)
-            cmd="grep -v '^#|^$' /etc/apt/sources.list 2>/dev/null | sed '/^$/d' | awk '{print}' | { echo '=== /etc/apt/sources.list ==='; cat; }; echo; echo '=== /etc/apt/sources.list.d/ ==='; for f in /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do [ -f \"\$f\" ] || continue; echo \"--- \$f ---\"; grep -v '^#' \"\$f\" 2>/dev/null | grep -v '^$' || true; echo; done"
+            cmd="{ echo '=== /etc/apt/sources.list ==='; grep -v '^[[:space:]]*#' /etc/apt/sources.list 2>/dev/null | grep -v '^[[:space:]]*$' || true; echo; echo '=== /etc/apt/sources.list.d/ ==='; for f in /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do [ -f \"\$f\" ] || continue; echo \"--- \$f ---\"; grep -v '^[[:space:]]*#' \"\$f\" 2>/dev/null | grep -v '^[[:space:]]*$' || true; echo; done; }"
             ;;
         dnf|yum)
             cmd="$pm repolist --all 2>/dev/null"
@@ -2159,7 +2160,6 @@ change_language() {
     else
         CURRENT_LANG="en"; echo "en" > "$LANG_FILE"
     fi
-    apply_text_direction
     zenity --info --title="GT-CLPM" \
         --text="$(get_msg "lang_changed")" --width=400
 }
@@ -2530,120 +2530,103 @@ change_ui_tool() {
 
 
 # ─── فحص التحديثات ────────────────────────────────────────────────────────────
-CURRENT_VERSION="1.5.0"
-VERSION_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-gui.sh"
+CURRENT_APP_VERSION="1.5.0"
+VERSION_CHECK_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-gui.sh"
+UNINSTALLER_LOCAL="$HOME/.local/share/gt-clpm/uninstall-gui.sh"
+UNINSTALLER_REMOTE="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh"
 
 check_for_updates() {
-    local checking_msg; [[ "$CURRENT_LANG" == "ar" ]]         && checking_msg="$(get_msg "checking_update")"         || checking_msg="$(get_msg "checking_update")"
+    local latest
+    zenity --info --title="GT-CLPM" \
+        --text="$(get_msg "check_update")..." --width=300 --timeout=1 2>/dev/null || true
 
-    zenity --info --title="GT-CLPM" --text="$checking_msg" --width=350 --timeout=1 2>/dev/null || true
-
-    local latest_version
     if command -v curl &>/dev/null; then
-        latest_version=$(curl -fsSL --max-time 8 "$VERSION_URL" 2>/dev/null             | grep -m1 "^# Version:" | sed 's/# Version: *//')
+        latest=$(curl -fsSL --max-time 8 "$VERSION_CHECK_URL" 2>/dev/null \
+            | grep -m1 "^# Version:" | sed 's/# Version: *//')
     elif command -v wget &>/dev/null; then
-        latest_version=$(wget -qO- --timeout=8 "$VERSION_URL" 2>/dev/null             | grep -m1 "^# Version:" | sed 's/# Version: *//')
+        latest=$(wget -qO- --timeout=8 "$VERSION_CHECK_URL" 2>/dev/null \
+            | grep -m1 "^# Version:" | sed 's/# Version: *//')
     fi
 
-    if [[ -z "$latest_version" ]]; then
-        zenity --warning --title="GT-CLPM"             --text="$(get_msg "update_error")" --width=400
+    if [[ -z "$latest" ]]; then
+        zenity --warning --title="GT-CLPM" \
+            --text="$(get_msg "update_error")" --width=400
         return
     fi
 
-    if [[ "$latest_version" == "$CURRENT_VERSION" ]]; then
-        zenity --info --title="GT-CLPM"             --text="$(get_msg "no_update")
-
-v$CURRENT_VERSION" --width=380
-    else
-        local msg
-        if [[ "$CURRENT_LANG" == "ar" ]]; then
-            msg="$(get_msg "update_available")
-
-الإصدار الحالي:  v${CURRENT_VERSION}
-الإصدار الجديد:  v${latest_version}"
-        else
-            msg="$(get_msg "update_available")
-
-Current version:  v${CURRENT_VERSION}
-New version:      v${latest_version}"
-        fi
-
-        zenity --question             --title="GT-CLPM — $(get_msg "update_available")"             --text="$msg"             --ok-label="$(get_msg "update_now")"             --cancel-label="$(get_msg "update_later")"             --width=420
-
-        if [[ $? -eq 0 ]]; then
-            local install_url="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh"
-            local tmp_installer; tmp_installer=$(mktemp /tmp/gt-clpm-update-XXXXXX.sh)
-            if command -v curl &>/dev/null; then
-                curl -fsSL "$install_url" -o "$tmp_installer" 2>/dev/null
-            else
-                wget -qO "$tmp_installer" "$install_url" 2>/dev/null
-            fi
-            if [[ -s "$tmp_installer" ]]; then
-                chmod +x "$tmp_installer"
-                show_terminal_box "GT-CLPM Update → v${latest_version}" "bash "$tmp_installer""
-                rm -f "$tmp_installer"
-            else
-                zenity --error --title="GT-CLPM"                     --text="$(get_msg "update_error")" --width=400
-                rm -f "$tmp_installer"
-            fi
-        fi
+    if [[ "$latest" == "$CURRENT_APP_VERSION" ]]; then
+        zenity --info --title="GT-CLPM" \
+            --text="$(get_msg "no_update")\n\nv${CURRENT_APP_VERSION}" --width=380
+        return
     fi
+
+    local msg
+    if [[ "$CURRENT_LANG" == "ar" ]]; then
+        msg="$(get_msg "update_available")\n\nالإصدار الحالي: v${CURRENT_APP_VERSION}\nالإصدار الجديد: v${latest}"
+    else
+        msg="$(get_msg "update_available")\n\nCurrent: v${CURRENT_APP_VERSION}\nNew:     v${latest}"
+    fi
+
+    zenity --question \
+        --title="GT-CLPM" \
+        --text="$msg" \
+        --ok-label="$(get_msg "update_now")" \
+        --cancel-label="$(get_msg "remind_later")" \
+        --width=400 || return
+
+    local tmp; tmp=$(mktemp /tmp/gt-clpm-install-XXXXXX.sh)
+    if command -v curl &>/dev/null; then
+        curl -fsSL "https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh" -o "$tmp" 2>/dev/null
+    else
+        wget -qO "$tmp" "https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh" 2>/dev/null
+    fi
+    if [[ -s "$tmp" ]]; then
+        chmod +x "$tmp"
+        show_terminal_box "GT-CLPM Update" "bash \"$tmp\""
+    else
+        zenity --error --title="GT-CLPM" --text="$(get_msg "update_error")" --width=400
+    fi
+    rm -f "$tmp"
 }
 
-# ─── إلغاء التثبيت من داخل البرنامج ──────────────────────────────────────────
-UNINSTALLER_LOCAL="$HOME/.local/share/gt-clpm/uninstall-gui.sh"
-UNINSTALLER_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh"
-
 uninstall_app() {
-    local confirm_msg; [[ "$CURRENT_LANG" == "ar" ]]         && confirm_msg="$(get_msg "uninstall_confirm")"         || confirm_msg="$(get_msg "uninstall_confirm")"
+    zenity --question --title="GT-CLPM" \
+        --text="$(get_msg "uninstall_confirm")" --width=420 || return
 
-    zenity --question --title="GT-CLPM"         --text="$confirm_msg" --width=420
-    [[ $? -ne 0 ]] && return
-
-    # البحث عن ملف إلغاء التثبيت المحلي
     local uninstaller=""
-    for path in "$UNINSTALLER_LOCAL"                 "$HOME/.local/share/gt-clpm-uninstall.sh"                 "/usr/local/share/gt-clpm/uninstall-gui.sh"; do
-        if [[ -f "$path" && -x "$path" ]]; then
-            uninstaller="$path"
-            break
-        fi
-    done
+    [[ -f "$UNINSTALLER_LOCAL" && -x "$UNINSTALLER_LOCAL" ]] && uninstaller="$UNINSTALLER_LOCAL"
 
-    # إن لم يوجد محلياً، نقترح التنزيل
     if [[ -z "$uninstaller" ]]; then
-        zenity --question --title="GT-CLPM"             --text="$(get_msg "uninstall_not_found")" --width=420
-        if [[ $? -eq 0 ]]; then
-            local tmp_un; tmp_un=$(mktemp /tmp/gt-clpm-uninstall-XXXXXX.sh)
-            if command -v curl &>/dev/null; then
-                curl -fsSL "$UNINSTALLER_URL" -o "$tmp_un" 2>/dev/null
-            else
-                wget -qO "$tmp_un" "$UNINSTALLER_URL" 2>/dev/null
-            fi
-            if [[ -s "$tmp_un" ]]; then
-                chmod +x "$tmp_un"
-                uninstaller="$tmp_un"
-            else
-                zenity --error --title="GT-CLPM"                     --text="$(get_msg "update_error")" --width=400
-                rm -f "$tmp_un"
-                return
-            fi
+        zenity --question --title="GT-CLPM" \
+            --text="$(get_msg "uninstaller_missing")" --width=420 || return
+        local tmp; tmp=$(mktemp /tmp/gt-clpm-uninstall-XXXXXX.sh)
+        if command -v curl &>/dev/null; then
+            curl -fsSL "$UNINSTALLER_REMOTE" -o "$tmp" 2>/dev/null
         else
+            wget -qO "$tmp" "$UNINSTALLER_REMOTE" 2>/dev/null
+        fi
+        if [[ -s "$tmp" ]]; then
+            chmod +x "$tmp"
+            uninstaller="$tmp"
+        else
+            zenity --error --title="GT-CLPM" --text="$(get_msg "update_error")" --width=400
+            rm -f "$tmp"
             return
         fi
     fi
 
-    # تشغيل إلغاء التثبيت في طرفية
-    if command -v x-terminal-emulator &>/dev/null; then
-        x-terminal-emulator -e bash -c "bash "$uninstaller"; echo; echo 'Press Enter to close...'; read"
-    elif command -v gnome-terminal &>/dev/null; then
-        gnome-terminal -- bash -c "bash "$uninstaller"; echo; echo 'Press Enter to close...'; read"
-    elif command -v konsole &>/dev/null; then
-        konsole -e bash -c "bash "$uninstaller"; echo; echo 'Press Enter to close...'; read"
-    elif command -v xterm &>/dev/null; then
-        xterm -e bash -c "bash "$uninstaller"; echo; echo 'Press Enter to close...'; read"
-    else
-        show_terminal_box "GT-CLPM — Uninstall" "bash "$uninstaller""
-    fi
+    for term in x-terminal-emulator gnome-terminal konsole xterm; do
+        if command -v "$term" &>/dev/null; then
+            case "$term" in
+                gnome-terminal) gnome-terminal -- bash -c "bash \"$uninstaller\"; read -p 'Press Enter...' " ;;
+                konsole)        konsole -e bash -c "bash \"$uninstaller\"; read -p 'Press Enter...' " ;;
+                xterm)          xterm -e bash -c "bash \"$uninstaller\"; read -p 'Press Enter...' " ;;
+                *)              "$term" -e bash -c "bash \"$uninstaller\"; read -p 'Press Enter...' " ;;
+            esac
+            return
+        fi
+    done
+    show_terminal_box "GT-CLPM Uninstall" "bash \"$uninstaller\""
 }
 
 settings_menu() {
@@ -2652,7 +2635,7 @@ settings_menu() {
         choice=$(zenity --list \
             --title="$(get_msg "settings")" \
             --column="" \
-            --width=420 --height=400 \
+            --width=420 --height=380 \
             "$(get_msg "change_lang")" \
             "$(get_msg "change_theme")" \
             "$(get_msg "change_ui_tool")" \
@@ -2707,45 +2690,30 @@ main_menu() {
     done
 }
 
-# ─── فحص دوري للتحديثات (مرة واحدة يومياً) ──────────────────────────────────
-_auto_update_check() {
-    local check_file="$HOME/.cache/gt-clpm-last-update-check"
-    mkdir -p "$(dirname "$check_file")"
-    local today; today=$(date +%Y%m%d)
-    local last_check=""
-    [[ -f "$check_file" ]] && last_check=$(cat "$check_file" 2>/dev/null)
-    if [[ "$last_check" != "$today" ]]; then
-        echo "$today" > "$check_file"
-        # فحص في الخلفية بدون تأخير الواجهة
-        (
-            sleep 2  # انتظر حتى تفتح الواجهة أولاً
-            local latest
-            if command -v curl &>/dev/null; then
-                latest=$(curl -fsSL --max-time 6 "$VERSION_URL" 2>/dev/null                     | grep -m1 "^# Version:" | sed 's/# Version: *//')
-            elif command -v wget &>/dev/null; then
-                latest=$(wget -qO- --timeout=6 "$VERSION_URL" 2>/dev/null                     | grep -m1 "^# Version:" | sed 's/# Version: *//')
-            fi
-            if [[ -n "$latest" && "$latest" != "$CURRENT_VERSION" ]]; then
-                local notif_msg
-                if [[ "$CURRENT_LANG" == "ar" ]]; then
-                    notif_msg="$(get_msg "update_available")
-
-الإصدار الجديد: v${latest}
-
-يمكنك التحديث من: الإعدادات ← فحص التحديثات"
-                else
-                    notif_msg="$(get_msg "update_available")
-
-New version: v${latest}
-
-Update from: Settings → Check for updates"
-                fi
-                zenity --info --title="GT-CLPM — Update"                     --text="$notif_msg" --width=420 2>/dev/null || true
-            fi
-        ) &
+# ─── فحص تلقائي للتحديثات (مرة واحدة يومياً) ────────────────────────────────
+(
+    _cache="$HOME/.cache/gt-clpm-update-check"
+    _today=$(date +%Y%m%d)
+    [[ -f "$_cache" && "$(cat "$_cache" 2>/dev/null)" == "$_today" ]] && exit 0
+    echo "$_today" > "$_cache"
+    sleep 3
+    _latest=""
+    if command -v curl &>/dev/null; then
+        _latest=$(curl -fsSL --max-time 6 \
+            "https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-gui.sh" \
+            2>/dev/null | grep -m1 "^# Version:" | sed 's/# Version: *//')
+    elif command -v wget &>/dev/null; then
+        _latest=$(wget -qO- --timeout=6 \
+            "https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-gui.sh" \
+            2>/dev/null | grep -m1 "^# Version:" | sed 's/# Version: *//')
     fi
-}
-
-_auto_update_check
+    [[ -z "$_latest" || "$_latest" == "1.5.0" ]] && exit 0
+    if [[ "$CURRENT_LANG" == "ar" ]]; then
+        _msg="🎉 يوجد تحديث متاح!\n\nالإصدار الجديد: v${_latest}\n\nيمكنك التحديث من: الإعدادات ← فحص التحديثات"
+    else
+        _msg="🎉 Update available!\n\nNew version: v${_latest}\n\nUpdate from: Settings → Check for updates"
+    fi
+    zenity --info --title="GT-CLPM — Update" --text="$_msg" --width=420 2>/dev/null || true
+) &
 
 main_menu
