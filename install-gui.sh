@@ -24,7 +24,7 @@ SCRIPT_NAME="gt-clpm-gui"
 DESKTOP_ENTRY_DIR="/usr/share/applications"
 ICONS_DIR="/usr/share/icons/hicolor"
 INSTALLED_ICON_NAME="gt-clpm-gui.png"
-UNINSTALLER_URL="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh"
+UNINSTALLER_REMOTE="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh"
 UNINSTALLER_LOCAL_DIR="$HOME/.local/share/gt-clpm"
 UNINSTALLER_LOCAL="$UNINSTALLER_LOCAL_DIR/uninstall-gui.sh"
 
@@ -159,29 +159,25 @@ install_script() {
     fi
 }
 
+# ─── Download and install icon ────────────────────────────────────────────────
 
-# ─── Download and save uninstaller locally ────────────────────────────────────
+# --- Save uninstaller locally ---
 save_uninstaller() {
     print_status "Saving uninstaller locally..."
-
     mkdir -p "$UNINSTALLER_LOCAL_DIR"
-
     if command -v curl &>/dev/null; then
-        curl -fsSL "$UNINSTALLER_URL" -o "$UNINSTALLER_LOCAL" 2>/dev/null || true
+        curl -fsSL "$UNINSTALLER_REMOTE" -o "$UNINSTALLER_LOCAL" 2>/dev/null || true
     else
-        wget -q "$UNINSTALLER_URL" -O "$UNINSTALLER_LOCAL" 2>/dev/null || true
+        wget -q "$UNINSTALLER_REMOTE" -O "$UNINSTALLER_LOCAL" 2>/dev/null || true
     fi
-
     if [[ -s "$UNINSTALLER_LOCAL" ]]; then
         chmod +x "$UNINSTALLER_LOCAL"
-        print_success "Uninstaller saved at $UNINSTALLER_LOCAL"
+        print_success "Uninstaller saved: $UNINSTALLER_LOCAL"
     else
         print_warning "Could not save uninstaller locally (non-critical)"
         rm -f "$UNINSTALLER_LOCAL"
     fi
 }
-
-# ─── Download and install icon ────────────────────────────────────────────────
 install_icons() {
     print_status "Installing application icons..."
 
@@ -216,7 +212,7 @@ install_icons() {
             chmod 644 "$icon_dir/$INSTALLED_ICON_NAME"
         fi
         print_status "✓ ${size} icon installed"
-        ((icons_ok++))
+        icons_ok=$((icons_ok + 1))
     done
 
     rm -f "$temp_icon"
@@ -282,6 +278,23 @@ update_desktop_database() {
             gtk-update-icon-cache -f -t "$ICONS_DIR" 2>/dev/null || true
         fi
         print_success "Icon cache updated"
+
+    # xdg-desktop-menu
+    if command -v xdg-desktop-menu &>/dev/null; then
+        print_status "Registering via xdg-desktop-menu..."
+        xdg-desktop-menu install --novendor "$DESKTOP_ENTRY_DIR/gt-clpm-gui.desktop" 2>/dev/null || true
+        print_success "Registered via xdg-desktop-menu"
+    fi
+
+    # KDE kbuildsycoca
+    for kbuild in kbuildsycoca6 kbuildsycoca5 kbuildsycoca; do
+        if command -v "$kbuild" &>/dev/null; then
+            print_status "Updating KDE cache ($kbuild)..."
+            "$kbuild" --noincremental 2>/dev/null || true
+            print_success "KDE cache updated"
+            break
+        fi
+    done
     fi
 }
 
