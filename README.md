@@ -4,9 +4,10 @@
 ![Version](https://img.shields.io/badge/Version-1.4.0-green)
 ![License](https://img.shields.io/badge/License-GPLv2-orange)
 ![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey)
-
-<img width="256" height="256" alt="GT-CLPM Logo" src="https://github.com/user-attachments/assets/6805474c-a20d-4ba4-b066-cf83536dbf31" />
-
+| شعار نسخة الطرفية | شعار نسخة الواجهة |
+| :---: | :---: | 
+| ![شعار نسخة الطرفية](https://github.com/SalehGNUTUX/GT-CLPM/blob/main/GT-CLPM/gt-usdr%20APPIAMGE%20BIULD/gt-clpm-cli-icon.png?raw=true) | ![شعار نسخة الواجهة](https://github.com/SalehGNUTUX/GT-CLPM/blob/main/GT-CLPM/gt-usdr%20APPIAMGE%20BIULD/gt-clpm-gui-icon.png?raw=true) 
+|
 مدير حزم سطر الأوامر الشامل لأنظمة غنو/لينكس  
 **الإصدار:** 1.4.0  
 **المطور:** GNUTUX  
