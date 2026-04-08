@@ -4,642 +4,700 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>GT-CLPM | Modern Package Manager for GNU/Linux</title>
-  <!-- Font Awesome 6 (Free) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Google Fonts: Inter + Cairo for Arabic -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700;14..32,800&family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <!-- Syne (display) + JetBrains Mono (code) + Cairo (Arabic) -->
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;600&family=Outfit:wght@300;400;500;600;700&family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-    /* ===== GT-CLPM COLOR PALETTE ===== */
+    /* ===== PALETTE ===== */
     :root {
-      --primary: #FF8A1C;
-      --primary-gold: #FFA733;
-      --primary-dark: #D96A00;
-      --glow-yellow: #FFD36A;
-      --glow-orange: #FFB347;
-      --glow-white: #FFF4E0;
-      --metal-dark: #8B3E00;
-      --metal-red: #A64B00;
-      --metal-light: #C56A1A;
-      --bg-deep: #1A0F0A;
-      --shadow-orange: #3B1F0F;
-      --terminal-green: #00FF88;
-      --terminal-dark: #00995C;
-      --logo-size: 70px;
+      --primary:       #FF8A1C;
+      --primary-gold:  #FFA733;
+      --primary-light: #FFD36A;
+      --primary-dark:  #D96A00;
+      --terminal-green:#00FF88;
+      --logo-size:     68px;
 
-      /* Light mode */
-      --bg-primary: #ffffff;
-      --bg-secondary: #fef9f2;
-      --surface: #ffffff;
-      --surface-elevated: #fff5e8;
-      --text-primary: #2c1a0c;
-      --text-secondary: #5a3a1e;
-      --text-muted: #8b6b42;
-      --border: #ffe0b5;
-      --accent: var(--primary);
-      --accent-hover: var(--primary-dark);
-      --accent-soft: #fff0e0;
-      --code-bg: #1e1b16;
-      --code-text: #f5e6d3;
-      --card-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.08);
-      --transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      /* Light Mode */
+      --bg:            #FDFAF6;
+      --bg2:           #FFF5E8;
+      --surface:       #FFFFFF;
+      --surface2:      #FFF0D9;
+      --text:          #1C0E04;
+      --text2:         #5B3410;
+      --text3:         #9C6938;
+      --border:        #FFDDB0;
+      --code-bg:       #181210;
+      --code-text:     #FFD36A;
+      --shadow:        0 8px 32px -8px rgba(0,0,0,0.10);
+      --shadow-lg:     0 24px 48px -12px rgba(0,0,0,0.15);
+      --glow:          0 0 40px rgba(255,138,28,0.18);
+      --glass-bg:      rgba(255, 255, 255, 0.7);
     }
 
     body.dark {
-      --bg-primary: #1A0F0A;
-      --bg-secondary: #2b1a10;
-      --surface: #241810;
-      --surface-elevated: #3b2618;
-      --text-primary: #FFF4E0;
-      --text-secondary: #FFD36A;
-      --text-muted: #c59a6b;
-      --border: #4a2e1c;
-      --accent: #FFA733;
-      --accent-hover: #FF8A1C;
-      --accent-soft: #3b1f0f;
-      --code-bg: #0f0b08;
-      --code-text: #FFD36A;
-      --card-shadow: 0 12px 28px -8px rgba(0, 0, 0, 0.5);
+      --bg:            #130C07;
+      --bg2:           #1E1008;
+      --surface:       #1C1208;
+      --surface2:      #2A1A0D;
+      --text:          #FFF4E0;
+      --text2:         #FFD36A;
+      --text3:         #C59A6B;
+      --border:        #3D2310;
+      --code-bg:       #0B0804;
+      --code-text:     #FFD36A;
+      --shadow:        0 8px 32px -8px rgba(0,0,0,0.50);
+      --shadow-lg:     0 24px 48px -12px rgba(0,0,0,0.70);
+      --glow:          0 0 60px rgba(255,138,28,0.12);
+      --glass-bg:      rgba(28, 18, 8, 0.7);
     }
+
+    html { scroll-behavior: smooth; }
 
     body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      transition: var(--transition);
-      line-height: 1.5;
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      transition: background 0.3s, color 0.3s;
+      overflow-x: hidden;
     }
 
-    body[dir="rtl"] {
-      font-family: 'Cairo', 'Inter', sans-serif;
+    /* Uniform font for both modes - English uses Outfit, Arabic uses Cairo with fallback */
+    body[dir="rtl"] { font-family: 'Cairo', 'Outfit', sans-serif; }
+    body[dir="rtl"] .hero h1, 
+    body[dir="rtl"] .section-title,
+    body[dir="rtl"] .logo-name,
+    body[dir="rtl"] .footer-brand { font-family: 'Cairo', 'Syne', sans-serif; }
+    
+    /* English mode also uses Syne for headers to match Arabic style */
+    .hero h1, .section-title, .logo-name, .footer-brand {
+      font-family: 'Syne', sans-serif;
     }
 
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
 
-    /* Header & Navigation */
+    /* ============ GLASS NAVBAR ============ */
     .navbar {
-      position: sticky;
-      top: 0;
-      background: rgba(var(--bg-primary-rgb), 0.92);
-      backdrop-filter: blur(12px);
+      position: sticky; top: 0; z-index: 100;
+      padding: 0.75rem 0;
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
-      z-index: 50;
-      padding: 0.8rem 0;
+      transition: background 0.3s;
     }
-    body:not(.dark) .navbar { background: rgba(255,248,240,0.92); }
-    body.dark .navbar { background: rgba(26,15,10,0.92); }
+    body:not(.dark) .navbar { background: rgba(253,250,246,0.75); }
+    body.dark      .navbar { background: rgba(19,12,7,0.8); }
 
     .nav-content {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
       flex-wrap: wrap;
-      gap: 1rem;
     }
 
-    .logo-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-    }
-    .logo-wrapper:hover { transform: scale(1.02); }
-    .logo-icon {
-      width: var(--logo-size);
-      height: var(--logo-size);
-      position: relative;
-      transition: all 0.3s ease;
-    }
-    .logo-icon img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      transition: opacity 0.25s ease, transform 0.2s ease;
-    }
-    .logo-icon .cli-logo, .logo-icon .gui-logo {
-      position: absolute;
-      top: 0;
-      left: 0;
-      backface-visibility: hidden;
-    }
-    .logo-icon .cli-logo { opacity: 1; transform: rotateY(0deg); }
-    .logo-icon .gui-logo { opacity: 0; transform: rotateY(180deg); }
-    .logo-wrapper.flipped .cli-logo { opacity: 0; transform: rotateY(180deg); }
-    .logo-wrapper.flipped .gui-logo { opacity: 1; transform: rotateY(0deg); }
-    .logo-text {
-      font-weight: 800;
-      font-size: 2rem;
+    .logo-wrap { display: flex; align-items: center; gap: 0.9rem; cursor: pointer; text-decoration: none; }
+    .logo-icon { width: var(--logo-size); height: var(--logo-size); position: relative; flex-shrink: 0; }
+    .logo-icon img { width: 100%; height: 100%; object-fit: contain; position: absolute; top: 0; left: 0; transition: opacity 0.3s, transform 0.3s; }
+    .logo-icon .gui-logo { opacity: 0; transform: rotateY(90deg); }
+    .logo-wrap.flipped .cli-logo { opacity: 0; transform: rotateY(90deg); }
+    .logo-wrap.flipped .gui-logo { opacity: 1; transform: rotateY(0); }
+
+    .logo-name {
+      font-size: 1.85rem; font-weight: 800;
+      background: linear-gradient(120deg, var(--primary), var(--primary-gold), var(--primary-light));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
       letter-spacing: -0.02em;
-      background: linear-gradient(135deg, var(--primary), var(--primary-gold), var(--glow-yellow));
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
     }
 
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap; }
+    .nav-links { display: flex; align-items: center; gap: 1.6rem; }
     .nav-links a {
-      color: var(--text-secondary);
-      text-decoration: none;
-      font-weight: 600;
-      transition: var(--transition);
+      color: var(--text2); font-weight: 600; font-size: 0.9rem;
+      text-decoration: none; transition: color 0.2s;
+      position: relative;
     }
-    .nav-links a:hover { color: var(--accent); }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px;
+      background: var(--primary); transition: width 0.2s ease;
+    }
+    .nav-links a:hover::after { width: 100%; }
+    .nav-links a:hover { color: var(--primary); }
 
-    .lang-switch, .theme-toggle {
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      padding: 0.5rem 0.9rem;
-      border-radius: 40px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 0.85rem;
-      transition: var(--transition);
-      color: var(--text-primary);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.4rem;
+    .nav-btns { display: flex; gap: 0.5rem; align-items: center; }
+    .pill-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.45rem 0.95rem; border-radius: 100px;
+      border: 1.5px solid var(--border); background: var(--glass-bg);
+      backdrop-filter: blur(4px);
+      color: var(--text); font-weight: 600; font-size: 0.82rem;
+      cursor: pointer; transition: all 0.2s;
     }
-    .lang-switch:hover, .theme-toggle:hover {
-      background: var(--accent);
-      color: #1A0F0A;
-      border-color: var(--accent);
-    }
+    .pill-btn:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px); }
 
+    /* ============ HERO ============ */
     .hero {
-      padding: 4rem 0 3rem;
+      position: relative;
+      padding: 5rem 0 4rem;
       text-align: center;
+      overflow: hidden;
     }
+    .hero::before {
+      content: '';
+      position: absolute; top: -80px; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse at center, rgba(255,138,28,0.25) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
     .hero-badge {
-      display: inline-block;
-      background: linear-gradient(120deg, var(--primary), var(--primary-gold));
-      color: #1A0F0A;
-      padding: 0.3rem 1.2rem;
-      border-radius: 40px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      margin-bottom: 1.5rem;
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--surface2); border: 1.5px solid var(--border);
+      color: var(--primary); font-weight: 700; font-size: 0.78rem;
+      padding: 0.35rem 1rem; border-radius: 100px;
+      margin-bottom: 2rem; letter-spacing: 0.02em;
+      backdrop-filter: blur(4px);
     }
+
     .hero h1 {
-      font-size: 3.5rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 1rem;
+      font-size: clamp(2.8rem, 7vw, 5rem);
+      font-weight: 800; letter-spacing: -0.03em;
+      line-height: 1.05;
+      margin-bottom: 1.4rem;
     }
     .hero-gradient {
-      background: linear-gradient(135deg, var(--primary), var(--primary-gold), var(--glow-yellow));
-      background-clip: text;
-      -webkit-background-clip: text;
-      color: transparent;
+      background: linear-gradient(120deg, var(--primary), var(--primary-gold), var(--primary-light));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
     }
-    .hero p {
-      max-width: 750px;
-      margin-left: auto;
-      margin-right: auto;
-      margin-bottom: 2rem;
-      font-size: 1.15rem;
+    .hero-sub {
+      display: block;
+      font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+      font-weight: 400; color: var(--text2);
+      margin-top: 0.5rem;
     }
-    .btn-group {
-      display: flex;
-      gap: 1.5rem;
-      justify-content: center;
-      flex-wrap: wrap;
-      margin-top: 0.8rem;
+    .hero-desc {
+      max-width: 640px; margin: 0 auto 2.5rem;
+      font-size: 1.05rem; color: var(--text3);
     }
+
+    .btn-row { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.5rem; }
     .btn {
-      padding: 0.85rem 2rem;
-      border-radius: 60px;
-      font-weight: 700;
-      text-decoration: none;
-      transition: var(--transition);
-      display: inline-flex;
-      align-items: center;
-      gap: 0.7rem;
-      font-size: 1rem;
+      display: inline-flex; align-items: center; gap: 0.6rem;
+      padding: 0.9rem 2rem; border-radius: 100px;
+      font-weight: 700; font-size: 0.95rem; text-decoration: none;
+      transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+      border: 1.5px solid transparent;
     }
     .btn-primary {
-      background: linear-gradient(95deg, var(--primary), var(--primary-gold));
-      color: #1A0F0A;
-      box-shadow: 0 4px 12px rgba(255,138,28,0.3);
+      background: linear-gradient(105deg, var(--primary), var(--primary-gold));
+      color: #1C0E04;
+      box-shadow: 0 4px 16px rgba(255,138,28,0.35);
     }
-    .btn-primary:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 20px -8px rgba(255,138,28,0.5);
-    }
+    .btn-primary:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(255,138,28,0.5); }
     .btn-outline {
-      border: 1.5px solid var(--accent);
-      color: var(--accent);
-      background: transparent;
+      border-color: var(--border); color: var(--text2); background: var(--glass-bg);
+      backdrop-filter: blur(4px);
     }
-    .btn-outline:hover { background: var(--accent); color: #1A0F0A; }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-3px); background: rgba(255,138,28,0.1); }
 
+    /* ============ MANAGER STRIP ============ */
+    .managers-strip {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 0.85rem;
+      padding: 2rem 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin: 1rem 0 2rem;
+    }
+    .m-chip {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      background: var(--glass-bg); backdrop-filter: blur(4px);
+      border: 1px solid var(--border);
+      border-radius: 100px; padding: 0.45rem 1.2rem;
+      font-weight: 600; font-size: 0.85rem; color: var(--text2);
+      transition: all 0.2s;
+    }
+    .m-chip i { color: var(--primary); font-size: 1rem; }
+    .m-chip:hover { border-color: var(--primary); color: var(--primary); transform: translateY(-2px) scale(1.02); background: var(--surface2); }
+
+    /* ============ SECTION ============ */
+    .section { padding: 4rem 0; }
+    .section-header { text-align: center; margin-bottom: 3rem; }
+    .section-label {
+      display: inline-block;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--primary); margin-bottom: 0.75rem;
+      background: var(--glass-bg); padding: 0.2rem 0.8rem; border-radius: 100px; backdrop-filter: blur(2px);
+    }
     .section-title {
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 2.5rem 0 1.5rem;
-      text-align: center;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      font-weight: 800; color: var(--text);
+      letter-spacing: -0.02em;
+    }
+    .section-title span {
       position: relative;
     }
-    .section-title:after {
+    .section-title span::after {
       content: '';
-      width: 60px;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), var(--glow-yellow));
-      display: block;
-      margin: 0.5rem auto 0;
-      border-radius: 4px;
+      position: absolute; left: 0; bottom: -6px;
+      width: 100%; height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      border-radius: 2px;
     }
-    .cards-grid {
+
+    /* ============ FEATURE CARDS ============ */
+    .feat-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 1.8rem;
-      margin: 2rem 0;
     }
-    .card {
-      background: var(--surface);
+    .feat-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
       border: 1px solid var(--border);
       border-radius: 28px;
-      padding: 1.6rem;
-      transition: var(--transition);
-      box-shadow: var(--card-shadow);
-    }
-    .card:hover { transform: translateY(-6px); border-color: var(--accent); }
-    .card-icon { font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem; }
-
-    .code-with-copy {
+      padding: 1.8rem;
+      transition: all 0.3s ease;
+      box-shadow: var(--shadow);
       position: relative;
-      margin: 1rem 0;
+      overflow: hidden;
     }
-    .code-block {
-      background: var(--code-bg);
-      border-radius: 18px;
+    .feat-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      transform: scaleX(0); transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+    .feat-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-lg), var(--glow); border-color: var(--primary); background: var(--surface); }
+    .feat-card:hover::before { transform: scaleX(1); }
+    .feat-icon {
+      width: 56px; height: 56px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-gold));
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.6rem; color: #1C0E04;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 8px 20px rgba(255,138,28,0.3);
+      transition: transform 0.2s;
+    }
+    .feat-card:hover .feat-icon { transform: scale(1.05); }
+    .feat-card h3 { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.75rem; }
+    .feat-card p { color: var(--text3); font-size: 0.92rem; line-height: 1.6; }
+
+    /* ============ CAROUSEL ============ */
+    .carousel-wrap {
+      position: relative;
+      max-width: 800px;
+      margin: 0 auto;
+      border-radius: 28px;
+      overflow: hidden;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      direction: ltr; /* FIX RTL BUG */
+    }
+    .carousel-track {
+      display: flex;
+      transition: transform 0.48s cubic-bezier(0.77, 0, 0.175, 1);
+    }
+    .carousel-slide {
+      min-width: 100%; background: #0D0906;
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .carousel-slide img {
+      width: 100%; height: auto; max-height: 460px;
+      object-fit: contain; display: block;
+    }
+    .carousel-caption {
+      padding: 0.8rem 1rem;
+      background: var(--surface2);
+      color: var(--text2);
+      font-size: 0.88rem; font-weight: 600;
+      text-align: center;
+      direction: inherit;
+    }
+    .carousel-nav {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      display: flex; justify-content: space-between;
+      width: 100%; pointer-events: none; padding: 0 1rem;
+    }
+    .carousel-btn {
+      pointer-events: all;
+      width: 44px; height: 44px;
+      border-radius: 50%; border: none;
+      background: rgba(0,0,0,0.6);
+      color: white; font-size: 1rem;
+      cursor: pointer; backdrop-filter: blur(8px);
+      transition: 0.2s;
+    }
+    .carousel-btn:hover { background: var(--primary); color: #1C0E04; transform: scale(1.05); }
+
+    .carousel-footer {
+      display: flex; align-items: center; justify-content: center; gap: 1.5rem;
       padding: 1rem;
-      overflow-x: auto;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      direction: inherit;
+    }
+    .indicators { display: flex; gap: 10px; }
+    .dot {
+      width: 10px; height: 10px; border-radius: 100px;
+      background: var(--text3); cursor: pointer; transition: all 0.2s;
+    }
+    .dot.active { width: 28px; background: var(--primary); }
+    .auto-btn {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.4rem 1rem; border-radius: 100px;
+      border: 1.5px solid var(--border); background: var(--surface2);
+      color: var(--text2); font-size: 0.8rem; font-weight: 600;
+      cursor: pointer; transition: 0.2s;
+    }
+    .auto-btn:hover { border-color: var(--primary); color: var(--primary); background: var(--glass-bg); }
+
+    /* ============ INSTALL ============ */
+    .install-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.8rem;
+    }
+    .install-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      transition: all 0.2s;
+    }
+    .install-card:hover { transform: translateY(-4px); border-color: var(--primary); box-shadow: var(--shadow-lg); }
+    .install-card h3 {
+      font-weight: 700; font-size: 1rem;
+      display: flex; align-items: center; gap: 0.6rem;
+      margin-bottom: 1.2rem;
+      color: var(--text);
+    }
+    .install-card h3 i { color: var(--primary); font-size: 1.2rem; }
+    .install-card h3 + h3 { margin-top: 1.8rem; }
+
+    /* CODE BLOCK WITH SAFE COPY BUTTON POSITIONING */
+    .code-block {
+      position: relative;
+      background: var(--code-bg);
+      border-radius: 16px;
+      padding: 1rem;
+      margin: 0.75rem 0;
       border-left: 4px solid var(--terminal-green);
+      overflow-x: auto;
+      direction: ltr;
     }
     .code-block pre {
       color: var(--code-text);
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
       white-space: pre-wrap;
       word-break: break-word;
       margin: 0;
-      padding-right: 2rem;
+      padding-right: 70px; /* Safe space for copy button in LTR */
     }
     .copy-btn {
       position: absolute;
-      top: 10px;
-      right: 10px;
-      background: var(--surface-elevated);
-      border: 1px solid var(--border);
-      padding: 0.3rem 0.7rem;
-      border-radius: 30px;
-      cursor: pointer;
-      font-size: 0.7rem;
-      font-weight: 600;
-      transition: 0.2s;
-      color: var(--text-secondary);
+      top: 8px;
+      right: 8px;
       display: inline-flex;
       align-items: center;
       gap: 0.3rem;
-    }
-    .copy-btn:hover { background: var(--accent); color: #1A0F0A; }
-
-    .managers-showcase {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1.5rem;
-      margin: 2rem 0;
-    }
-    .manager-icon {
-      background: var(--surface-elevated);
-      border-radius: 60px;
-      padding: 0.5rem 1.2rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 0.6rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 10px;
+      border: 1px solid #444;
+      background: #222;
+      color: #ccc;
+      font-size: 0.68rem;
       font-weight: 600;
-      font-size: 0.9rem;
-      border: 1px solid var(--border);
-      transition: 0.2s;
-    }
-    .manager-icon i, .manager-icon span {
-      font-size: 1.3rem;
-    }
-    .manager-icon:hover { border-color: var(--primary); transform: scale(1.02); }
-    .pacman-symbol {
-      font-size: 1.4rem;
-      font-weight: normal;
-      display: inline-block;
-      transform: translateY(-1px);
-    }
-
-    /* improved carousel container: smaller frame, fixed height, object-fit cover */
-    .carousel-container {
-      position: relative;
-      max-width: 760px;
-      margin: 2rem auto;
-      border-radius: 28px;
-      overflow: hidden;
-      box-shadow: var(--card-shadow);
-      background: var(--surface);
-      border: 1px solid var(--border);
-    }
-    .carousel-slides {
-      display: flex;
-      transition: transform 0.5s ease-in-out;
-    }
-    .carousel-slide {
-      min-width: 100%;
-      box-sizing: border-box;
-      background: #1a120c;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-    }
-    /* force uniform image sizing: fill the container nicely with proper aspect */
-    .carousel-slide img {
-      width: 100%;
-      height: auto;
-      max-height: 440px;
-      object-fit: contain;
-      background: #0f0b08;
-      display: block;
-      margin: 0 auto;
-    }
-    .carousel-caption {
-      text-align: center;
-      padding: 0.7rem;
-      background: var(--surface-elevated);
-      font-weight: 500;
-      color: var(--text-secondary);
-      font-size: 0.9rem;
-    }
-    .carousel-btn {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(0,0,0,0.65);
-      color: white;
-      border: none;
-      font-size: 1.8rem;
-      padding: 0.2rem 0.8rem;
-      cursor: pointer;
-      border-radius: 40px;
-      backdrop-filter: blur(4px);
-      transition: 0.2s;
-      z-index: 10;
-    }
-    .carousel-btn:hover { background: var(--primary); color: #1A0F0A; }
-    .btn-prev { left: 15px; }
-    .btn-next { right: 15px; }
-    .carousel-indicators {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 12px;
-      background: var(--surface);
-    }
-    .indicator {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--text-muted);
       cursor: pointer;
       transition: 0.2s;
+      z-index: 5;
     }
-    .indicator.active { background: var(--primary); width: 24px; border-radius: 12px; }
-    .carousel-control {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 1rem;
+    .copy-btn:hover { background: var(--primary); color: #1C0E04; border-color: var(--primary); transform: translateY(-1px); }
+    
+    /* RTL adjustment for copy button */
+    body[dir="rtl"] .code-block {
+      border-left: none;
+      border-right: 4px solid var(--terminal-green);
     }
-    .carousel-control button {
-      background: var(--surface-elevated);
+    body[dir="rtl"] .code-block pre {
+      padding-right: 0;
+      padding-left: 70px; /* Safe space for copy button in RTL */
+    }
+    body[dir="rtl"] .copy-btn {
+      right: auto;
+      left: 8px;
+    }
+
+    .install-note {
+      font-size: 0.88rem; color: var(--text3); margin-top: 1rem;
+    }
+    .install-note code {
+      background: var(--surface2); padding: 0.1rem 0.4rem; border-radius: 6px;
+      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    }
+
+    .badge-row { display: flex; gap: 0.7rem; flex-wrap: wrap; margin-top: 1rem; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: 100px; padding: 0.35rem 0.9rem;
+      font-size: 0.78rem; font-weight: 600; color: var(--text2);
+    }
+
+    /* ============ USAGE ============ */
+    .usage-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .usage-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
       border: 1px solid var(--border);
-      padding: 0.4rem 1rem;
-      border-radius: 40px;
-      cursor: pointer;
-      font-weight: 600;
-      color: var(--text-primary);
+      border-radius: 24px; padding: 1.8rem; box-shadow: var(--shadow);
+      transition: all 0.2s;
     }
-    .carousel-control button:hover { background: var(--accent); color: #1A0F0A; }
+    .usage-card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: var(--shadow-lg); }
+    .usage-card h3 { font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1rem; }
+    .usage-card h3 i { color: var(--primary); font-size: 1.2rem; }
+    .usage-card p { font-size: 0.9rem; color: var(--text3); margin-top: 0.75rem; }
 
-    .scroll-top {
-      position: fixed;
-      bottom: 2rem;
-      right: 2rem;
-      background: var(--primary);
-      color: #1A0F0A;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      cursor: pointer;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      z-index: 99;
-      border: none;
-    }
-    .scroll-top.show {
-      opacity: 1;
-      visibility: visible;
-    }
-    .scroll-top:hover {
-      background: var(--primary-dark);
-      transform: translateY(-3px);
-    }
-
+    /* ============ FOOTER ============ */
     footer {
       border-top: 1px solid var(--border);
-      margin-top: 4rem;
-      padding: 2rem 0;
+      padding: 2.5rem 0; margin-top: 5rem;
       text-align: center;
+      background: var(--glass-bg);
+      backdrop-filter: blur(8px);
     }
+    footer p { font-size: 0.88rem; color: var(--text3); margin: 0.4rem 0; }
+    footer a { color: var(--primary); text-decoration: none; font-weight: 500; }
+    footer a:hover { text-decoration: underline; }
+    .footer-brand {
+      font-size: 1.3rem; font-weight: 800;
+      background: linear-gradient(120deg, var(--primary), var(--primary-light));
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+      margin-bottom: 0.75rem;
+    }
+
+    /* ============ SCROLL TOP ============ */
+    .scroll-top {
+      position: fixed; bottom: 2rem; right: 2rem;
+      width: 52px; height: 52px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #1C0E04; border: none;
+      font-size: 1.2rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 4px 20px rgba(255,138,28,0.5);
+      opacity: 0; visibility: hidden;
+      transition: all 0.3s;
+      z-index: 99;
+    }
+    body[dir="rtl"] .scroll-top { right: auto; left: 2rem; }
+    .scroll-top.show { opacity: 1; visibility: visible; }
+    .scroll-top:hover { transform: translateY(-5px) scale(1.05); background: var(--primary); }
+
+    /* ============ DIVIDER ============ */
+    .divider {
+      height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 0;
+    }
+
+    /* ============ RTL ADJUSTMENTS ============ */
+    body[dir="rtl"] .feat-card::before { transform-origin: right; }
+    body[dir="rtl"] .section-title span::after { left: auto; right: 0; }
+
+    /* ============ RESPONSIVE ============ */
     @media (max-width: 768px) {
-      .hero h1 { font-size: 2rem; }
-      .nav-content { flex-direction: column; }
-      .logo-text { font-size: 1.5rem; }
-      :root { --logo-size: 52px; }
-      .btn-group { gap: 1rem; }
-      .btn { padding: 0.7rem 1.5rem; font-size: 0.9rem; }
-      .carousel-container { max-width: 95%; }
-      .carousel-slide img { max-height: 280px; }
+      .hero h1 { font-size: 2.2rem; }
+      .nav-links { display: none; }
+      .feat-grid, .install-grid, .usage-grid { grid-template-columns: 1fr; }
+      .carousel-wrap { border-radius: 16px; }
+      .btn-row { gap: 1rem; }
+      .btn { padding: 0.7rem 1.5rem; font-size: 0.85rem; }
+      .hero { padding: 3rem 0 2rem; }
+      .code-block pre { padding-right: 65px; }
+      body[dir="rtl"] .code-block pre { padding-left: 65px; }
     }
-    /* ensure rtl buttons alignment */
-    body[dir="rtl"] .copy-btn { right: auto; left: 10px; }
-    body[dir="rtl"] .code-block pre { padding-right: 0; padding-left: 2rem; }
+
+    /* ============ ANIMATIONS ============ */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero > * { animation: fadeUp 0.6s ease both; }
+    .hero > *:nth-child(1) { animation-delay: 0.0s; }
+    .hero > *:nth-child(2) { animation-delay: 0.1s; }
+    .hero > *:nth-child(3) { animation-delay: 0.2s; }
+    .hero > *:nth-child(4) { animation-delay: 0.3s; }
   </style>
 </head>
 <body>
-  <div class="navbar">
+
+  <!-- ===== NAVBAR ===== -->
+  <nav class="navbar">
     <div class="container nav-content">
-      <div class="logo-wrapper" id="logoFlipper">
+      <div class="logo-wrap" id="logoFlipper">
         <div class="logo-icon">
-          <img class="cli-logo" src="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-cli-icon.png" alt="CLI icon" onerror="this.src='https://placehold.co/70x70/FF8A1C/white?text=CLI'">
-          <img class="gui-logo" src="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-gui-icon.png" alt="GUI icon" onerror="this.src='https://placehold.co/70x70/FFA733/white?text=GUI'">
+          <img class="cli-logo" src="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-cli-icon.png" alt="CLI" onerror="this.src='https://placehold.co/68x68/FF8A1C/1C0E04?text=CLI'">
+          <img class="gui-logo" src="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/GT-CLPM/gt-clpm-gui-icon.png" alt="GUI" onerror="this.src='https://placehold.co/68x68/FFA733/1C0E04?text=GUI'">
         </div>
-        <div class="logo-text">GT-CLPM</div>
+        <span class="logo-name">GT-CLPM</span>
       </div>
-      <div class="nav-links">
-        <a href="#features" data-i18n="nav_features">Features</a>
-        <a href="#install" data-i18n="nav_install">Install</a>
-        <a href="#screenshots" data-i18n="nav_screenshots">Screenshots</a>
-        <a href="https://github.com/SalehGNUTUX/GT-CLPM" target="_blank"><i class="fab fa-github"></i> GitHub</a>
-        <button class="theme-toggle" id="themeToggle"><i class="fas fa-moon"></i> <span id="themeText">Dark</span></button>
-        <button class="lang-switch" id="langToggle"><span id="langFlag">🇬🇧</span> <span id="langLabel">English</span></button>
+
+      <div class="nav-right">
+        <nav class="nav-links">
+          <a href="#features"     data-i18n="nav_features">Features</a>
+          <a href="#screenshots"  data-i18n="nav_screenshots">Screenshots</a>
+          <a href="#install"      data-i18n="nav_install">Install</a>
+          <a href="https://github.com/SalehGNUTUX/GT-CLPM" target="_blank"><i class="fab fa-github"></i> GitHub</a>
+        </nav>
+        <div class="nav-btns">
+          <button class="pill-btn" id="themeToggle"><i class="fas fa-moon"></i> <span id="themeText">Dark</span></button>
+          <button class="pill-btn" id="langToggle"><span id="langFlag">🇬🇧</span> <span id="langLabel">English</span></button>
+        </div>
       </div>
     </div>
-  </div>
+  </nav>
 
+  <!-- ===== HERO ===== -->
   <main>
     <div class="container">
-      <div class="hero">
-        <div class="hero-badge" data-i18n="version_badge">⚡ v1.4.0 — KDialog + Dist-Upgrade (2026)</div>
-        <h1><span data-i18n="hero_title">GT-CLPM</span> <span class="hero-gradient">GNUTUX</span><br><span data-i18n="hero_sub">Command Line Package Manager</span></h1>
-        <p data-i18n="hero_desc">Unified graphical & CLI package management for 13+ systems, with auto-detection, Flatpak/Snap, and full programming language toolchains.</p>
-        <div class="btn-group">
-          <a href="#install" class="btn btn-primary"><i class="fas fa-download"></i> <span data-i18n="btn_install">Install Now</span></a>
+      <section class="hero">
+        <div class="hero-badge"><i class="fas fa-bolt"></i> <span data-i18n="version_badge">v1.4.0 — KDialog + Dist-Upgrade (2026)</span></div>
+        <h1>
+          <span class="hero-gradient" data-i18n="hero_title">GT-CLPM</span>
+          <span class="hero-gradient"> GNUTUX</span><br>
+          <span class="hero-sub" data-i18n="hero_sub">Command Line Package Manager</span>
+        </h1>
+        <p class="hero-desc" data-i18n="hero_desc">Unified graphical &amp; CLI package management for 13+ systems, with auto-detection, Flatpak/Snap, and full programming language toolchains.</p>
+        <div class="btn-row">
+          <a href="#install"   class="btn btn-primary"><i class="fas fa-download"></i> <span data-i18n="btn_install">Install Now</span></a>
           <a href="https://github.com/SalehGNUTUX/GT-CLPM/releases" class="btn btn-outline"><i class="fab fa-github"></i> <span data-i18n="btn_releases">Releases</span></a>
-          <a href="#appimage" class="btn btn-outline"><i class="fas fa-box"></i> <span data-i18n="btn_appimage">AppImage</span></a>
+          <a href="#appimage"  class="btn btn-outline"><i class="fas fa-box"></i> <span data-i18n="btn_appimage">AppImage</span></a>
         </div>
+      </section>
+
+      <!-- Manager strip -->
+      <div class="managers-strip">
+        <span class="m-chip"><i class="fab fa-ubuntu"></i> APT</span>
+        <span class="m-chip"><i class="fab fa-fedora"></i> DNF</span>
+        <span class="m-chip"><span class="pacman-sym">⍩⃝</span> Pacman</span>
+        <span class="m-chip"><i class="fas fa-suse"></i> Zypper</span>
+        <span class="m-chip"><i class="fab fa-python"></i> Pip</span>
+        <span class="m-chip"><i class="fab fa-node-js"></i> NPM</span>
+        <span class="m-chip"><i class="fas fa-box"></i> Flatpak</span>
+        <span class="m-chip"><i class="fas fa-cube"></i> Snap</span>
+        <span class="m-chip"><i class="fas fa-code-branch"></i> Nix</span>
+        <span class="m-chip"><i class="fas fa-terminal"></i> Homebrew</span>
+        <span class="m-chip"><i class="fas fa-layer-group"></i> Emerge</span>
+        <span class="m-chip"><i class="fas fa-database"></i> XBPS</span>
+        <span class="m-chip"><i class="fas fa-archive"></i> APK</span>
       </div>
 
-      <div class="managers-showcase">
-        <span class="manager-icon"><i class="fab fa-ubuntu"></i> APT</span>
-        <span class="manager-icon"><i class="fab fa-fedora"></i> DNF</span>
-        <span class="manager-icon"><span class="pacman-symbol">⍩⃝</span> Pacman</span>
-        <span class="manager-icon"><i class="fas fa-suse"></i> Zypper</span>
-        <span class="manager-icon"><i class="fab fa-python"></i> Pip</span>
-        <span class="manager-icon"><i class="fab fa-node-js"></i> NPM</span>
-        <span class="manager-icon"><i class="fas fa-box"></i> Flatpak</span>
-        <span class="manager-icon"><i class="fas fa-cube"></i> Snap</span>
-        <span class="manager-icon"><i class="fas fa-code-branch"></i> Nix</span>
-        <span class="manager-icon"><i class="fas fa-terminal"></i> Homebrew</span>
-      </div>
-
-      <div id="features">
-        <h2 class="section-title" data-i18n="features_title">✨ Powerful Features</h2>
-        <div class="cards-grid">
-          <div class="card"><div class="card-icon"><i class="fas fa-globe"></i></div><h3 data-i18n="feat1_title">Multi-Language & RTL</h3><p data-i18n="feat1_desc">Arabic & English with automatic system language detection, full RTL support.</p></div>
-          <div class="card"><div class="card-icon"><i class="fas fa-desktop"></i></div><h3 data-i18n="feat2_title">Zenity + KDialog</h3><p data-i18n="feat2_desc">Auto-detects GTK (Zenity) or Qt/KDE (KDialog), graphical root password dialog.</p></div>
-          <div class="card"><div class="card-icon"><i class="fas fa-rocket"></i></div><h3 data-i18n="feat3_title">Dist-Upgrade Ready</h3><p data-i18n="feat3_desc">Full system upgrade for APT, DNF, Pacman, Zypper, and more.</p></div>
-          <div class="card"><div class="card-icon"><i class="fas fa-code-branch"></i></div><h3 data-i18n="feat4_title">Language Managers</h3><p data-i18n="feat4_desc">Python (pip/pipx), Node.js, Rust, Go, Ruby, Java, PHP, Haskell, Conda, Spack.</p></div>
-          <div class="card"><div class="card-icon"><i class="fas fa-boxes"></i></div><h3 data-i18n="feat5_title">13+ Package Managers</h3><p data-i18n="feat5_desc">APT, DNF, Pacman, Zypper, Flatpak, Snap, Nix, Homebrew, Emerge, XBPS, APK, Eopkg, PKG.</p></div>
-          <div class="card"><div class="card-icon"><i class="fas fa-shield-alt"></i></div><h3 data-i18n="feat6_title">Smart Maintenance</h3><p data-i18n="feat6_desc">Broken repair, intelligent removal, PPA/repository management, backup & restore.</p></div>
+      <!-- ===== FEATURES ===== -->
+      <section class="section" id="features">
+        <div class="section-header">
+          <div class="section-label" data-i18n="section_label_feat">Capabilities</div>
+          <h2 class="section-title"><span data-i18n="features_title">Powerful Features</span></h2>
         </div>
-      </div>
+        <div class="feat-grid">
+          <div class="feat-card"><div class="feat-icon"><i class="fas fa-globe"></i></div><h3 data-i18n="feat1_title">Multi-Language & RTL</h3><p data-i18n="feat1_desc">Arabic & English with automatic system language detection, full RTL support.</p></div>
+          <div class="feat-card"><div class="feat-icon"><i class="fas fa-desktop"></i></div><h3 data-i18n="feat2_title">Zenity + KDialog</h3><p data-i18n="feat2_desc">Auto-detects GTK (Zenity) or Qt/KDE (KDialog), graphical root password dialog.</p></div>
+          <div class="feat-card"><div class="feat-icon"><i class="fas fa-rocket"></i></div><h3 data-i18n="feat3_title">Dist-Upgrade Ready</h3><p data-i18n="feat3_desc">Full system upgrade for APT, DNF, Pacman, Zypper, and more.</p></div>
+          <div class="feat-card"><div class="feat-icon"><i class="fas fa-code-branch"></i></div><h3 data-i18n="feat4_title">Language Managers</h3><p data-i18n="feat4_desc">Python (pip/pipx), Node.js, Rust, Go, Ruby, Java, PHP, Haskell, Conda, Spack.</p></div>
+          <div class="feat-card"><div class="feat-icon"><i class="fas fa-boxes-stacked"></i></div><h3 data-i18n="feat5_title">13+ Package Managers</h3><p data-i18n="feat5_desc">APT, DNF, Pacman, Zypper, Flatpak, Snap, Nix, Homebrew, Emerge, XBPS, APK, Eopkg, PKG.</p></div>
+          <div class="feat-card"><div class="feat-icon"><i class="fas fa-screwdriver-wrench"></i></div><h3 data-i18n="feat6_title">Smart Maintenance</h3><p data-i18n="feat6_desc">Broken repair, intelligent removal, PPA/repository management, backup & restore.</p></div>
+        </div>
+      </section>
 
-      <div id="screenshots">
-        <h2 class="section-title" data-i18n="screenshots_title">📸 Screenshot Gallery</h2>
-        <div class="carousel-container">
-          <div class="carousel-slides" id="carouselSlides">
+      <div class="divider"></div>
+
+      <!-- ===== SCREENSHOTS ===== -->
+      <section class="section" id="screenshots">
+        <div class="section-header">
+          <div class="section-label" data-i18n="section_label_ss">Gallery</div>
+          <h2 class="section-title"><span data-i18n="screenshots_title">Screenshot Gallery</span></h2>
+        </div>
+        <div class="carousel-wrap">
+          <div class="carousel-track" id="carouselTrack">
             <div class="carousel-slide"><img src="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/screenshot/GT-CLPM-GUI-EN.png" alt="GUI English" loading="lazy"><div class="carousel-caption">🇬🇧 GT-CLPM GUI (English)</div></div>
             <div class="carousel-slide"><img src="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/screenshot/GT-CLPM-GUI-AR.png" alt="GUI Arabic" loading="lazy"><div class="carousel-caption">🇸🇦 GT-CLPM GUI (العربية)</div></div>
             <div class="carousel-slide"><img src="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/screenshot/%D8%A7%D9%84%D9%82%D8%A7%D8%A6%D9%85%D8%A9%20%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9%20%D9%86%D8%B3%D8%AE%D8%A9%20%D8%A7%D9%84%D8%B7%D8%B1%D9%81%D9%8A%D8%A9%20%D8%A7%D9%84%D8%B9%D8%B1%D8%A8%D9%8A%D8%A9.png" alt="CLI Arabic" loading="lazy"><div class="carousel-caption">🇸🇦 CLI Version (Arabic Terminal)</div></div>
             <div class="carousel-slide"><img src="https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/screenshot/%D8%A7%D9%84%D9%82%D8%A7%D8%A6%D9%85%D8%A9%20%D8%A7%D9%84%D8%B1%D8%A6%D9%8A%D8%B3%D9%8A%D8%A9%20%D9%86%D8%B3%D8%AE%D8%A9%20%D8%A7%D9%84%D8%B7%D8%B1%D9%81%D9%8A%D8%A9%20%D8%A7%D9%84%D8%A5%D9%86%D8%AC%D9%84%D9%8A%D8%B2%D9%8A%D8%A9.png" alt="CLI English" loading="lazy"><div class="carousel-caption">🇬🇧 CLI Version (English Terminal)</div></div>
           </div>
-          <button class="carousel-btn btn-prev" id="prevBtn">❮</button>
-          <button class="carousel-btn btn-next" id="nextBtn">❯</button>
-          <div class="carousel-indicators" id="indicators"></div>
-          <div class="carousel-control">
-            <button id="toggleAutoBtn"><i class="fas fa-pause"></i> <span data-i18n="pause_auto">Pause</span></button>
-          </div>
+          <div class="carousel-nav"><button class="carousel-btn" id="prevBtn"><i class="fas fa-chevron-left"></i></button><button class="carousel-btn" id="nextBtn"><i class="fas fa-chevron-right"></i></button></div>
+          <div class="carousel-footer"><div class="indicators" id="indicators"></div><button class="auto-btn" id="toggleAutoBtn"><i class="fas fa-pause"></i><span data-i18n="pause_auto">Pause</span></button></div>
         </div>
-      </div>
+      </section>
 
-      <div id="install">
-        <h2 class="section-title" data-i18n="install_title">📥 Installation</h2>
-        <div class="cards-grid">
-          <div class="card">
+      <div class="divider"></div>
+
+      <!-- ===== INSTALL ===== -->
+      <section class="section" id="install">
+        <div class="section-header">
+          <div class="section-label" data-i18n="section_label_install">Setup</div>
+          <h2 class="section-title"><span data-i18n="install_title">Installation</span></h2>
+        </div>
+        <div class="install-grid">
+          <div class="install-card">
             <h3><i class="fas fa-terminal"></i> <span data-i18n="cli_install">CLI One-Liner</span></h3>
-            <div class="code-with-copy">
-              <div class="code-block"><pre>curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash</pre></div>
-              <button class="copy-btn" data-cmd='curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash'><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button>
-            </div>
+            <div class="code-block"><pre>curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash</pre><button class="copy-btn" data-cmd="curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install.sh | bash"><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button></div>
+            
             <h3><i class="fas fa-chalkboard-user"></i> <span data-i18n="gui_install">GUI One-Liner</span></h3>
-            <div class="code-with-copy">
-              <div class="code-block"><pre>curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh | bash</pre></div>
-              <button class="copy-btn" data-cmd='curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh | bash'><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button>
-            </div>
-            <p><span data-i18n="manual_hint">Manual:</span> <code>git clone https://github.com/SalehGNUTUX/GT-CLPM.git &amp;&amp; cd GT-CLPM &amp;&amp; ./install.sh</code></p>
+            <div class="code-block"><pre>curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh | bash</pre><button class="copy-btn" data-cmd="curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/install-gui.sh | bash"><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button></div>
+            
+            <h3><i class="fas fa-code-branch"></i> <span data-i18n="manual_install">Manual Install (git clone)</span></h3>
+            <div class="code-block"><pre>git clone https://github.com/SalehGNUTUX/GT-CLPM.git
+cd GT-CLPM
+./install.sh</pre><button class="copy-btn" data-cmd="git clone https://github.com/SalehGNUTUX/GT-CLPM.git && cd GT-CLPM && ./install.sh"><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button></div>
           </div>
-          <div class="card" id="appimage">
+
+          <div class="install-card" id="appimage">
             <h3><i class="fas fa-file-image"></i> <span data-i18n="appimage_title">AppImage (No Install)</span></h3>
-            <p data-i18n="appimage_desc">Run directly or integrate with <strong>Gear Lever</strong> from Flathub.</p>
-            <div class="code-with-copy">
-              <div class="code-block"><pre>wget https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM-GUI-x86_64.AppImage
+            <p class="install-note" data-i18n="appimage_desc">Run directly or integrate with <strong>Gear Lever</strong> from Flathub.</p>
+            <div class="code-block"><pre>wget https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM-GUI-x86_64.AppImage
 chmod +x GT-CLPM-GUI-x86_64.AppImage
-./GT-CLPM-GUI-x86_64.AppImage</pre></div>
-              <button class="copy-btn" data-cmd='wget https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM-GUI-x86_64.AppImage && chmod +x GT-CLPM-GUI-x86_64.AppImage && ./GT-CLPM-GUI-x86_64.AppImage'><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button>
-            </div>
-            <div class="code-with-copy">
-              <div class="code-block"><pre>wget https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM_.CLI.-x86_64.AppImage
+./GT-CLPM-GUI-x86_64.AppImage</pre><button class="copy-btn" data-cmd="wget https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM-GUI-x86_64.AppImage && chmod +x GT-CLPM-GUI-x86_64.AppImage && ./GT-CLPM-GUI-x86_64.AppImage"><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button></div>
+            <div class="code-block"><pre>wget https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM_.CLI.-x86_64.AppImage
 chmod +x GT-CLPM_.CLI.-x86_64.AppImage
-./GT-CLPM_.CLI.-x86_64.AppImage</pre></div>
-              <button class="copy-btn" data-cmd='wget https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM_.CLI.-x86_64.AppImage && chmod +x GT-CLPM_.CLI.-x86_64.AppImage && ./GT-CLPM_.CLI.-x86_64.AppImage'><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button>
-            </div>
-            <div class="badge-list" style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-top:0.5rem;">
-              <span class="manager-icon"><i class="fab fa-linux"></i> x86_64</span>
-              <a href="https://flathub.org/en/apps/it.mijorus.gearlever" target="_blank" style="color:var(--accent);">⚙️ Gear Lever</a>
-            </div>
+./GT-CLPM_.CLI.-x86_64.AppImage</pre><button class="copy-btn" data-cmd="wget https://github.com/SalehGNUTUX/GT-CLPM/releases/download/GT-CLPM-2026-x86_64.AppImage/GT-CLPM_.CLI.-x86_64.AppImage && chmod +x GT-CLPM_.CLI.-x86_64.AppImage && ./GT-CLPM_.CLI.-x86_64.AppImage"><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button></div>
+            <div class="badge-row"><span class="badge"><i class="fab fa-linux"></i> x86_64</span><a href="https://flathub.org/en/apps/it.mijorus.gearlever" target="_blank" style="color:var(--primary); font-weight:600">⚙️ Gear Lever</a></div>
           </div>
-          <div class="card">
+
+          <div class="install-card">
             <h3><i class="fas fa-trash-alt"></i> <span data-i18n="uninstall_title">Uninstall</span></h3>
-            <div class="code-with-copy">
-              <div class="code-block"><pre>curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh | bash</pre></div>
-              <button class="copy-btn" data-cmd='curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh | bash'><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button>
-            </div>
-            <div class="code-with-copy">
-              <div class="code-block"><pre>curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash</pre></div>
-              <button class="copy-btn" data-cmd='curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash'><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button>
-            </div>
+            <div class="code-block"><pre>curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh | bash</pre><button class="copy-btn" data-cmd="curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall-gui.sh | bash"><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button></div>
+            <div class="code-block"><pre>curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash</pre><button class="copy-btn" data-cmd="curl -fsSL https://raw.githubusercontent.com/SalehGNUTUX/GT-CLPM/main/uninstall.sh | bash"><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div>
-        <h2 class="section-title" data-i18n="usage_title">🚀 Quick Usage</h2>
-        <div class="cards-grid">
-          <div class="card">
+      <div class="divider"></div>
+
+      <!-- ===== USAGE ===== -->
+      <section class="section">
+        <div class="section-header">
+          <div class="section-label" data-i18n="section_label_usage">Quick Start</div>
+          <h2 class="section-title"><span data-i18n="usage_title">Quick Usage</span></h2>
+        </div>
+        <div class="usage-grid">
+          <div class="usage-card">
             <h3><i class="fas fa-laptop-code"></i> <span data-i18n="gui_launch">Launch GUI</span></h3>
-            <div class="code-block"><pre>gt-clpm-gui</pre></div>
+            <div class="code-block"><pre>gt-clpm-gui</pre><button class="copy-btn" data-cmd="gt-clpm-gui"><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button></div>
             <p data-i18n="gui_note">Auto-detects Zenity (GTK) or KDialog (KDE) — graphical password via pkexec.</p>
           </div>
-          <div class="card">
+          <div class="usage-card">
             <h3><i class="fas fa-terminal"></i> <span data-i18n="cli_launch">CLI Mode</span></h3>
-            <div class="code-block"><pre>gt-clpm</pre></div>
-            <p data-i18n="cli_note">Paginated search, smart selection, backup & restore.</p>
+            <div class="code-block"><pre>gt-clpm</pre><button class="copy-btn" data-cmd="gt-clpm"><i class="fas fa-copy"></i> <span class="copy-text" data-i18n="copy_btn">Copy</span></button></div>
+            <p data-i18n="cli_note">Paginated search, smart selection, backup &amp; restore.</p>
           </div>
-          <div class="card">
+          <div class="usage-card">
             <h3><i class="fas fa-sync-alt"></i> <span data-i18n="dist_upgrade">Dist-Upgrade Submenu</span></h3>
             <p data-i18n="upgrade_info">Select "Update system" → "Full system upgrade (dist-upgrade)" for APT, DNF, Pacman, Zypper.</p>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   </main>
 
@@ -647,184 +705,163 @@ chmod +x GT-CLPM_.CLI.-x86_64.AppImage
 
   <footer>
     <div class="container">
+      <div class="footer-brand">GT-CLPM</div>
       <p>GT-CLPM © 2026 GNUTUX — Licensed under GPLv2</p>
-      <p><a href="https://github.com/SalehGNUTUX/GT-CLPM/issues" style="color:var(--accent);">Report issue</a> | <a href="https://github.com/SalehGNUTUX/GT-CLPM" style="color:var(--accent);">GitHub</a> | <span data-i18n="footer_thanks">Empowering Linux package management</span></p>
+      <p><a href="https://github.com/SalehGNUTUX/GT-CLPM/issues">Report Issue</a> · <a href="https://github.com/SalehGNUTUX/GT-CLPM">GitHub</a> · <span data-i18n="footer_thanks">Empowering Linux package management</span></p>
     </div>
   </footer>
 
   <script>
-    const translations = {
+    const T = {
       en: {
-        nav_features: "Features", nav_install: "Install", nav_screenshots: "Screenshots",
-        version_badge: "⚡ v1.4.0 — KDialog + Dist-Upgrade (2026)",
-        hero_title: "GT-CLPM", hero_sub: "Command Line Package Manager",
-        hero_desc: "Unified graphical & CLI package management for 13+ systems, with auto-detection, Flatpak/Snap, and full programming language toolchains.",
-        btn_install: "Install Now", btn_releases: "Releases", btn_appimage: "AppImage",
-        features_title: "✨ Powerful Features", feat1_title: "Multi-Language & RTL", feat1_desc: "Arabic & English with automatic system language detection, full RTL support.",
-        feat2_title: "Zenity + KDialog", feat2_desc: "Auto-detects GTK (Zenity) or Qt/KDE (KDialog), graphical root password dialog.",
-        feat3_title: "Dist-Upgrade Ready", feat3_desc: "Full system upgrade for APT, DNF, Pacman, Zypper, and more.",
-        feat4_title: "Language Managers", feat4_desc: "Python (pip/pipx), Node.js, Rust, Go, Ruby, Java, PHP, Haskell, Conda, Spack.",
-        feat5_title: "13+ Package Managers", feat5_desc: "APT, DNF, Pacman, Zypper, Flatpak, Snap, Nix, Homebrew, Emerge, XBPS, APK, Eopkg, PKG.",
-        feat6_title: "Smart Maintenance", feat6_desc: "Broken repair, intelligent removal, PPA/repository management, backup & restore.",
-        install_title: "📥 Installation", cli_install: "CLI One-Liner", gui_install: "GUI One-Liner", manual_hint: "Manual:",
-        appimage_title: "AppImage (No Install)", appimage_desc: "Run directly or integrate with Gear Lever from Flathub.",
-        uninstall_title: "🗑️ Uninstall", screenshots_title: "📸 Screenshot Gallery",
-        usage_title: "🚀 Quick Usage", gui_launch: "Launch GUI", cli_launch: "CLI Mode", dist_upgrade: "Dist-Upgrade Submenu",
-        upgrade_info: 'Select "Update system" → "Full system upgrade (dist-upgrade)" for APT, DNF, Pacman, Zypper.',
-        gui_note: "Auto-detects Zenity (GTK) or KDialog (KDE) — graphical password via pkexec.",
-        cli_note: "Paginated search, smart selection, backup & restore.", footer_thanks: "Empowering Linux package management",
-        pause_auto: "Pause", play_auto: "Auto", copy_btn: "Copy"
+        nav_features:"Features", nav_install:"Install", nav_screenshots:"Screenshots",
+        version_badge:"v1.4.0 — KDialog + Dist-Upgrade (2026)",
+        hero_title:"GT-CLPM", hero_sub:"Command Line Package Manager",
+        hero_desc:"Unified graphical & CLI package management for 13+ systems, with auto-detection, Flatpak/Snap, and full programming language toolchains.",
+        btn_install:"Install Now", btn_releases:"Releases", btn_appimage:"AppImage",
+        section_label_feat:"Capabilities", features_title:"Powerful Features",
+        feat1_title:"Multi-Language & RTL", feat1_desc:"Arabic & English with automatic system language detection, full RTL support.",
+        feat2_title:"Zenity + KDialog",     feat2_desc:"Auto-detects GTK (Zenity) or Qt/KDE (KDialog), graphical root password dialog.",
+        feat3_title:"Dist-Upgrade Ready",   feat3_desc:"Full system upgrade for APT, DNF, Pacman, Zypper, and more.",
+        feat4_title:"Language Managers",    feat4_desc:"Python (pip/pipx), Node.js, Rust, Go, Ruby, Java, PHP, Haskell, Conda, Spack.",
+        feat5_title:"13+ Package Managers", feat5_desc:"APT, DNF, Pacman, Zypper, Flatpak, Snap, Nix, Homebrew, Emerge, XBPS, APK, Eopkg, PKG.",
+        feat6_title:"Smart Maintenance",    feat6_desc:"Broken repair, intelligent removal, PPA/repository management, backup & restore.",
+        section_label_ss:"Gallery",         screenshots_title:"Screenshot Gallery",
+        section_label_install:"Setup",      install_title:"Installation",
+        cli_install:"CLI One-Liner", gui_install:"GUI One-Liner", manual_install:"Manual Install (git clone)",
+        appimage_title:"AppImage (No Install)", appimage_desc:"Run directly or integrate with Gear Lever from Flathub.",
+        uninstall_title:"Uninstall",
+        section_label_usage:"Quick Start",  usage_title:"Quick Usage",
+        gui_launch:"Launch GUI", cli_launch:"CLI Mode", dist_upgrade:"Dist-Upgrade Submenu",
+        upgrade_info:'Select "Update system" → "Full system upgrade (dist-upgrade)" for APT, DNF, Pacman, Zypper.',
+        gui_note:"Auto-detects Zenity (GTK) or KDialog (KDE) — graphical password via pkexec.",
+        cli_note:"Paginated search, smart selection, backup & restore.",
+        footer_thanks:"Empowering Linux package management",
+        pause_auto:"Pause", play_auto:"Auto", copy_btn:"Copy"
       },
       ar: {
-        nav_features: "المميزات", nav_install: "التثبيت", nav_screenshots: "لقطات الشاشة",
-        version_badge: "⚡ الإصدار 1.4.0 — دعم KDialog والترقية الشاملة (2026)",
-        hero_title: "GT-CLPM", hero_sub: "مدير حزم سطر الأوامر",
-        hero_desc: "واجهة رسومية وسطر أوامر موحدة لأكثر من 13 مدير حزم، مع كشف تلقائي و Flatpak/Snap وأدوات لغات البرمجة.",
-        btn_install: "تثبيت الآن", btn_releases: "الإصدارات", btn_appimage: "AppImage",
-        features_title: "✨ ميزات قوية", feat1_title: "ثنائية اللغة و RTL", feat1_desc: "دعم العربية والإنجليزية مع كشف لغة النظام تلقائياً.",
-        feat2_title: "Zenity و KDialog", feat2_desc: "كشف تلقائي لبيئة GTK أو KDE ونافذة صلاحيات رسومية.",
-        feat3_title: "الترقية الشاملة", feat3_desc: "دعم الترقية الكاملة لـ APT، DNF، Pacman، Zypper وغيرها.",
-        feat4_title: "مديري لغات البرمجة", feat4_desc: "Python, Node.js, Rust, Go, Ruby, Java, PHP, Haskell, Conda, Spack.",
-        feat5_title: "أكثر من 13 مدير حزم", feat5_desc: "APT، DNF، Pacman، Zypper، Flatpak، Snap، Nix، Homebrew وغيرها.",
-        feat6_title: "صيانة ذكية", feat6_desc: "إصلاح الحزم المعطلة، إزالة ذكية، إدارة المستودعات والنسخ الاحتياطي.",
-        install_title: "📥 التثبيت", cli_install: "سطر أوامر (سطر واحد)", gui_install: "واجهة رسومية (سطر واحد)", manual_hint: "التثبيت اليدوي:",
-        appimage_title: "AppImage (بدون تثبيت)", appimage_desc: "تشغيل مباشر أو دمجه مع Gear Lever من Flathub.",
-        uninstall_title: "🗑️ إلغاء التثبيت", screenshots_title: "📸 معرض لقطات الشاشة",
-        usage_title: "🚀 طريقة الاستخدام", gui_launch: "تشغيل الواجهة", cli_launch: "نسخة الطرفية", dist_upgrade: "قائمة الترقية الشاملة",
-        upgrade_info: 'اختر "تحديث النظام" ← "ترقية شاملة (dist-upgrade)" لـ APT، DNF، Pacman، Zypper.',
-        gui_note: "كشف تلقائي لـ Zenity أو KDialog مع نافذة صلاحيات رسومية.",
-        cli_note: "بحث بتصفح صفحات، اختيار ذكي ونسخ احتياطي.", footer_thanks: "تمكين إدارة الحزم في لينكس",
-        pause_auto: "إيقاف", play_auto: "تشغيل", copy_btn: "نسخ"
+        nav_features:"المميزات", nav_install:"التثبيت", nav_screenshots:"لقطات الشاشة",
+        version_badge:"الإصدار 1.4.0 — دعم KDialog والترقية الشاملة (2026)",
+        hero_title:"GT-CLPM", hero_sub:"مدير حزم سطر الأوامر",
+        hero_desc:"واجهة رسومية وسطر أوامر موحدة لأكثر من 13 مدير حزم، مع كشف تلقائي و Flatpak/Snap وأدوات لغات البرمجة.",
+        btn_install:"تثبيت الآن", btn_releases:"الإصدارات", btn_appimage:"AppImage",
+        section_label_feat:"الإمكانيات",   features_title:"ميزات قوية",
+        feat1_title:"ثنائية اللغة و RTL",  feat1_desc:"دعم العربية والإنجليزية مع كشف لغة النظام تلقائياً.",
+        feat2_title:"Zenity و KDialog",     feat2_desc:"كشف تلقائي لبيئة GTK أو KDE ونافذة صلاحيات رسومية.",
+        feat3_title:"الترقية الشاملة",      feat3_desc:"دعم الترقية الكاملة لـ APT، DNF، Pacman، Zypper وغيرها.",
+        feat4_title:"مديري لغات البرمجة",  feat4_desc:"Python, Node.js, Rust, Go, Ruby, Java, PHP, Haskell, Conda, Spack.",
+        feat5_title:"أكثر من 13 مدير حزم", feat5_desc:"APT، DNF، Pacman، Zypper، Flatpak، Snap، Nix، Homebrew وغيرها.",
+        feat6_title:"صيانة ذكية",           feat6_desc:"إصلاح الحزم المعطلة، إزالة ذكية، إدارة المستودعات والنسخ الاحتياطي.",
+        section_label_ss:"المعرض",          screenshots_title:"معرض لقطات الشاشة",
+        section_label_install:"الإعداد",    install_title:"التثبيت",
+        cli_install:"سطر أوامر (سطر واحد)", gui_install:"واجهة رسومية (سطر واحد)", manual_install:"التثبيت اليدوي (git clone)",
+        appimage_title:"AppImage (بدون تثبيت)", appimage_desc:"تشغيل مباشر أو دمجه مع Gear Lever من Flathub.",
+        uninstall_title:"إلغاء التثبيت",
+        section_label_usage:"البداية السريعة", usage_title:"طريقة الاستخدام",
+        gui_launch:"تشغيل الواجهة", cli_launch:"نسخة الطرفية", dist_upgrade:"قائمة الترقية الشاملة",
+        upgrade_info:'اختر "تحديث النظام" ← "ترقية شاملة (dist-upgrade)" لـ APT، DNF، Pacman، Zypper.',
+        gui_note:"كشف تلقائي لـ Zenity أو KDialog مع نافذة صلاحيات رسومية.",
+        cli_note:"بحث بتصفح صفحات، اختيار ذكي ونسخ احتياطي.",
+        footer_thanks:"تمكين إدارة الحزم في لينكس",
+        pause_auto:"إيقاف", play_auto:"تشغيل", copy_btn:"نسخ"
       }
     };
 
-    let currentLang = localStorage.getItem('gtclpm_lang') || (navigator.language.startsWith('ar') ? 'ar' : 'en');
-    let darkMode = localStorage.getItem('gtclpm_theme') === 'dark';
+    let lang = localStorage.getItem('gtclpm_lang') || (navigator.language.startsWith('ar') ? 'ar' : 'en');
+    let dark = localStorage.getItem('gtclpm_theme') === 'dark' || (localStorage.getItem('gtclpm_theme') === null && window.matchMedia('(prefers-color-scheme: dark)').matches);
 
-    function applyLanguage(lang) {
+    function applyLang(l) {
+      lang = l;
       document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (translations[lang] && translations[lang][key]) {
-          if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = translations[lang][key];
-          else el.innerText = translations[lang][key];
-        }
+        const k = el.getAttribute('data-i18n');
+        if (T[l]?.[k]) el.tagName === 'INPUT' ? el.placeholder = T[l][k] : el.innerText = T[l][k];
       });
-      document.querySelectorAll('.copy-text').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (key && translations[lang] && translations[lang][key]) el.innerText = translations[lang][key];
-      });
-      const flagSpan = document.getElementById('langFlag');
-      const labelSpan = document.getElementById('langLabel');
-      if (lang === 'ar') {
-        flagSpan.textContent = '🇲🇦';
-        labelSpan.textContent = 'العربية';
-      } else {
-        flagSpan.textContent = '🇬🇧';
-        labelSpan.textContent = 'English';
-      }
-      document.documentElement.setAttribute('lang', lang);
-      if (lang === 'ar') document.body.setAttribute('dir', 'rtl');
-      else document.body.setAttribute('dir', 'ltr');
-      localStorage.setItem('gtclpm_lang', lang);
-      currentLang = lang;
-      const themeSpan = document.getElementById('themeText');
-      if (themeSpan) themeSpan.innerText = darkMode ? (lang === 'ar' ? 'فاتح' : 'Light') : (lang === 'ar' ? 'داكن' : 'Dark');
-      // update auto button text according to current auto state
-      const autoBtnSpan = toggleAutoBtn.querySelector('span');
-      if (autoBtnSpan && translations[lang]) {
-        autoBtnSpan.innerText = isAutoPlaying ? (lang === 'ar' ? 'إيقاف' : 'Pause') : (lang === 'ar' ? 'تشغيل' : 'Auto');
-      }
+      document.getElementById('langFlag').textContent  = l === 'ar' ? '🇲🇦' : '🇬🇧';
+      document.getElementById('langLabel').textContent = l === 'ar' ? 'العربية' : 'English';
+      document.documentElement.lang = l;
+      document.body.setAttribute('dir', l === 'ar' ? 'rtl' : 'ltr');
+      localStorage.setItem('gtclpm_lang', l);
+      updateThemeLabel();
+      updateAutoLabel();
     }
 
-    function toggleTheme() {
-      darkMode = !darkMode;
-      document.body.classList.toggle('dark', darkMode);
-      localStorage.setItem('gtclpm_theme', darkMode ? 'dark' : 'light');
-      const themeSpan = document.getElementById('themeText');
-      if (themeSpan) themeSpan.innerText = darkMode ? (currentLang === 'ar' ? 'فاتح' : 'Light') : (currentLang === 'ar' ? 'داكن' : 'Dark');
+    function updateThemeLabel() {
+      const s = document.getElementById('themeText');
+      if (s) s.innerText = dark ? (lang==='ar'?'فاتح':'Light') : (lang==='ar'?'داكن':'Dark');
     }
 
-    function initTheme() {
-      const saved = localStorage.getItem('gtclpm_theme');
-      if (saved === 'dark') darkMode = true;
-      else if (saved === 'light') darkMode = false;
-      else darkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      document.body.classList.toggle('dark', darkMode);
-      const themeSpan = document.getElementById('themeText');
-      if (themeSpan) themeSpan.innerText = darkMode ? (currentLang === 'ar' ? 'فاتح' : 'Light') : (currentLang === 'ar' ? 'داكن' : 'Dark');
+    function applyTheme() {
+      document.body.classList.toggle('dark', dark);
+      localStorage.setItem('gtclpm_theme', dark ? 'dark' : 'light');
+      updateThemeLabel();
     }
 
-    const logo = document.getElementById('logoFlipper');
+    // Logo Flip
     let flipped = false;
-    logo.addEventListener('click', (e) => {
-      e.preventDefault();
+    document.getElementById('logoFlipper').addEventListener('click', () => {
       flipped = !flipped;
-      if (flipped) logo.classList.add('flipped');
-      else logo.classList.remove('flipped');
-      setTimeout(() => { window.location.reload(); }, 200);
+      document.getElementById('logoFlipper').classList.toggle('flipped', flipped);
+      setTimeout(() => location.reload(), 200);
     });
 
+    document.getElementById('themeToggle').addEventListener('click', () => { dark = !dark; applyTheme(); });
+    document.getElementById('langToggle').addEventListener('click', () => applyLang(lang === 'en' ? 'ar' : 'en'));
+
+    // Copy buttons
     document.querySelectorAll('.copy-btn').forEach(btn => {
       btn.addEventListener('click', () => {
-        const cmd = btn.getAttribute('data-cmd');
-        navigator.clipboard.writeText(cmd).then(() => {
-          const originalSpan = btn.querySelector('.copy-text');
-          const originalText = originalSpan.innerText;
-          originalSpan.innerText = (currentLang === 'ar' ? 'تم!' : 'Done!');
-          setTimeout(() => { originalSpan.innerText = originalText; }, 1500);
+        navigator.clipboard.writeText(btn.dataset.cmd || '').then(() => {
+          const sp = btn.querySelector('.copy-text');
+          const orig = sp.innerText;
+          sp.innerText = lang === 'ar' ? 'تم!' : 'Done!';
+          setTimeout(() => sp.innerText = orig, 1500);
         });
       });
     });
 
-    const slides = document.getElementById('carouselSlides');
-    const slideItems = document.querySelectorAll('.carousel-slide');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const indicatorsContainer = document.getElementById('indicators');
-    const toggleAutoBtn = document.getElementById('toggleAutoBtn');
-    let currentIndex = 0;
-    let autoInterval = null;
-    let isAutoPlaying = true;
+    // Carousel
+    const track = document.getElementById('carouselTrack');
+    const slides = track.querySelectorAll('.carousel-slide');
+    const indWrap = document.getElementById('indicators');
+    const autoBtn = document.getElementById('toggleAutoBtn');
+    let idx = 0, timer = null, playing = true;
 
-    function updateCarousel() {
-      slides.style.transform = `translateX(-${currentIndex * 100}%)`;
-      document.querySelectorAll('.indicator').forEach((ind, i) => {
-        if (i === currentIndex) ind.classList.add('active');
-        else ind.classList.remove('active');
-      });
-    }
-    function nextSlide() { currentIndex = (currentIndex + 1) % slideItems.length; updateCarousel(); }
-    function prevSlide() { currentIndex = (currentIndex - 1 + slideItems.length) % slideItems.length; updateCarousel(); }
-    function startAuto() { if (autoInterval) clearInterval(autoInterval); autoInterval = setInterval(nextSlide, 4000); isAutoPlaying = true; toggleAutoBtn.innerHTML = `<i class="fas fa-pause"></i> <span data-i18n="pause_auto">${currentLang === 'ar' ? 'إيقاف' : 'Pause'}</span>`; applyLanguage(currentLang); }
-    function stopAuto() { if (autoInterval) { clearInterval(autoInterval); autoInterval = null; } isAutoPlaying = false; toggleAutoBtn.innerHTML = `<i class="fas fa-play"></i> <span data-i18n="play_auto">${currentLang === 'ar' ? 'تشغيل' : 'Auto'}</span>`; applyLanguage(currentLang); }
-    function toggleAuto() { if (isAutoPlaying) stopAuto(); else startAuto(); }
-
-    slideItems.forEach((_, idx) => {
-      const dot = document.createElement('div');
-      dot.classList.add('indicator');
-      if (idx === 0) dot.classList.add('active');
-      dot.addEventListener('click', () => { currentIndex = idx; updateCarousel(); if (isAutoPlaying) { stopAuto(); startAuto(); } });
-      indicatorsContainer.appendChild(dot);
+    slides.forEach((_, i) => {
+      const d = document.createElement('div');
+      d.className = 'dot' + (i === 0 ? ' active' : '');
+      d.addEventListener('click', () => goTo(i));
+      indWrap.appendChild(d);
     });
-    prevBtn.addEventListener('click', () => { prevSlide(); if (isAutoPlaying) { stopAuto(); startAuto(); } });
-    nextBtn.addEventListener('click', () => { nextSlide(); if (isAutoPlaying) { stopAuto(); startAuto(); } });
-    toggleAutoBtn.addEventListener('click', toggleAuto);
+
+    function goTo(n) {
+      idx = (n + slides.length) % slides.length;
+      track.style.transform = `translateX(-${idx * 100}%)`;
+      document.querySelectorAll('.dot').forEach((d,i) => d.classList.toggle('active', i===idx));
+    }
+
+    function updateAutoLabel() {
+      const sp = autoBtn.querySelector('span');
+      const ic = autoBtn.querySelector('i');
+      if (!sp) return;
+      if (playing) { ic.className = 'fas fa-pause'; sp.innerText = T[lang]?.pause_auto || 'Pause'; }
+      else         { ic.className = 'fas fa-play';  sp.innerText = T[lang]?.play_auto  || 'Auto'; }
+    }
+    function startAuto() { timer = setInterval(() => goTo(idx+1), 4000); playing=true; updateAutoLabel(); }
+    function stopAuto()  { clearInterval(timer); timer=null; playing=false; updateAutoLabel(); }
+
+    document.getElementById('prevBtn').addEventListener('click', () => { goTo(idx-1); if(playing){stopAuto();startAuto();} });
+    document.getElementById('nextBtn').addEventListener('click', () => { goTo(idx+1); if(playing){stopAuto();startAuto();} });
+    autoBtn.addEventListener('click', () => playing ? stopAuto() : startAuto());
     startAuto();
 
+    // Scroll top
     const scrollBtn = document.getElementById('scrollTopBtn');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 300) scrollBtn.classList.add('show');
-      else scrollBtn.classList.remove('show');
-    });
-    scrollBtn.addEventListener('click', () => { window.scrollTo({ top: 0, behavior: 'smooth' }); });
+    window.addEventListener('scroll', () => scrollBtn.classList.toggle('show', scrollY > 300));
+    scrollBtn.addEventListener('click', () => scrollTo({ top:0, behavior:'smooth' }));
 
-    document.getElementById('themeToggle')?.addEventListener('click', toggleTheme);
-    document.getElementById('langToggle')?.addEventListener('click', () => {
-      const newLang = currentLang === 'en' ? 'ar' : 'en';
-      applyLanguage(newLang);
-    });
-    initTheme();
-    applyLanguage(currentLang);
+    // Init
+    applyTheme();
+    applyLang(lang);
   </script>
 </body>
 </html>
